@@ -3,11 +3,17 @@ using UnityEngine;
 public class AsteroidController : MonoBehaviour
 {
     [Header("Asteroid Settings")]
-    public float healthMax = 3f;
+    public float healthMax = 5f;
     private float healthCurrent;
     public float collisionDamage = 1f;
-    public GameObject[] asteroids;
     public float asteroidVelocity = 3f;
+
+    [Header("Chunk Settings")]
+    public GameObject[] asteroidChunks;
+    public int chunkMin = 0;
+    public int chunkMax = 4;
+    public float chunkDistance = 0.5f;
+    public float chunkForce = 10f;
 
     [Header("Private Settings")]
     private Rigidbody2D rb2d;
@@ -55,12 +61,18 @@ public class AsteroidController : MonoBehaviour
         Destroy(gameObject);
     }
 
+    private void Explosion()
+    {
+        int numChunks = Random.Range(chunkMin, chunkMax + 1);
+        for (int i = 0; i < numChunks; i++)
+        {
+            BreakApart();
+        }
+    }
+
     private void BreakApart()
     {
-        foreach (GameObject i in asteroids)
-        {
-            Instantiate(i, transform.position, transform.rotation);
-        }
-
+        int numChunks = Random.Range(chunkMin, chunkMax +1);
+        Instantiate(asteroidChunks[numChunks], transform.position, transform.rotation);
     }
 }

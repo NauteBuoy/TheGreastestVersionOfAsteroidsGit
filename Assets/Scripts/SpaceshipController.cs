@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using UnityEditor.Rendering.LookDev;
 using UnityEngine;
 using UnityEngine.VFX;
 using static UnityEngine.RuleTile.TilingRuleOutput;
@@ -15,32 +16,27 @@ public class SpaceshipController : MonoBehaviour
     [Header("Dash/Roll Settings")]
     public float dashForce = 10f;
     public float dashCooldown = 1f;
-    public float dashDuration = 0.15f;   // short burst
-    public float squashAmount = 0.5f;    // how much to squash/stretch
-    public float squashSpeed = 10f;      // how fast it returns to normal
-
+    public float dashDuration = 0.15f;
+    public float squashAmount = 0.5f;    //how much to squash/stretch
+    public float squashSpeed = 10f;      //how fast it returns to normal
 
     [Header("Private Settings")]
     private Rigidbody2D rbShip;
     private float lastDashTime = -10f;
     private float dashTimer = 0f;
     private Vector3 baseScale;
+    private CameraController camShake;
 
     [Header("Bullet Settings")]
     public GameObject bulletObj;
+    public float bulletOffset = 0.25f;
     public float bulletSpeed = 100f;
     public float fireRate = 0.33f;
     private float fireTimer = 0f;
 
-
     [Header("Particle Settings")]
     public ParticleController visualEffects;
-
-
-    //[Header("Projectile Settings")]
-    //public GameObject laser;
-    //float laserCooldown;
-    //float laserCooldownTimer;
+    public GameObject explosionSystem;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -49,6 +45,8 @@ public class SpaceshipController : MonoBehaviour
         rbShip = GetComponent<Rigidbody2D>();
         rbShip.gravityScale = 0f;
         baseScale = transform.localScale;
+
+        camShake = Camera.main.GetComponent<CameraController>();
     }
 
     // Update is called once per frame
@@ -80,6 +78,9 @@ public class SpaceshipController : MonoBehaviour
 
     public void Explode()
     {
+        camShake?.Shake(0.4f, 0.4f);
+
+        Instantiate(explosionSystem, transform.position, Quaternion.identity);
         Destroy(gameObject); // remove the spaceship!
     }
 
@@ -97,7 +98,7 @@ public class SpaceshipController : MonoBehaviour
 
     public void FireBullet()
     {
-        Vector3 spawnPos = transform.position + transform.up * 0.25f;
+        Vector3 spawnPos = transform.position + transform.up * bulletOffset;
         GameObject bullet = Instantiate(bulletObj, spawnPos, transform.rotation);
 
         Rigidbody2D rbBullet = bullet.GetComponent<Rigidbody2D>();

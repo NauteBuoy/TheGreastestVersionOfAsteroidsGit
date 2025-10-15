@@ -4884,7 +4884,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4445d97f37151e54cb88909404cd0fb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  EnginePower: 150
+  healthMax: 3
+  healthCurrent: 0
+  enginePower: 200
   rotationPower: 6
   maxVelocity: 4
   dashForce: 40
@@ -4892,7 +4894,12 @@ MonoBehaviour:
   dashDuration: 0.15
   squashAmount: 0.5
   squashSpeed: 4
+  bulletObj: {fileID: 0}
+  bulletOffset: 0.25
+  bulletSpeed: 100
+  fireRate: 0.33
   visualEffects: {fileID: 0}
+  explosionSystem: {fileID: 9119991457998186944, guid: 9e80bf40a52fe1c48b50ffc08133d49b, type: 3}
 --- !u!114 &9114864416598855991
 MonoBehaviour:
   m_ObjectHideFlags: 0
