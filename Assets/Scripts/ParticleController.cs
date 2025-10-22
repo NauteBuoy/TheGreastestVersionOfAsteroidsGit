@@ -3,9 +3,8 @@ using UnityEngine;
 public class ParticleController : MonoBehaviour
 {
     [Header("Particle Systems")]
-    public ParticleSystem waterSpray;   // continuous engine spray
+    public ParticleSystem EngineFX;   // continuous engine spray
     public ParticleSystem dashSpray;    // Q/E sidestep burst
-    public ParticleSystem ripple;       // ripple under ship
 
     [Header("Settings")]
     public float waterSprayReductionTime = 0.15f; // short pause during X flip
@@ -29,12 +28,12 @@ public class ParticleController : MonoBehaviour
 
     private void HandleWaterSpray()
     {
-        if (waterSpray == null) return;
+        if (EngineFX == null) return;
 
         if (waterSprayTimer > 0f)
         {
             waterSprayTimer -= Time.deltaTime;
-            if (waterSpray.isEmitting) waterSpray.Stop();
+            if (EngineFX.isEmitting) EngineFX.Stop();
             return;
         }
 
@@ -42,11 +41,11 @@ public class ParticleController : MonoBehaviour
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
         if (rb != null && rb.linearVelocity.magnitude > minSprayVelocity)
         {
-            if (!waterSpray.isEmitting) waterSpray.Play();
+            if (!EngineFX.isEmitting) EngineFX.Play();
         }
         else
         {
-            if (waterSpray.isEmitting) waterSpray.Stop();
+            if (EngineFX.isEmitting) EngineFX.Stop();
         }
     }
 

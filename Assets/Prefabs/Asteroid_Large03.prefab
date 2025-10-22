@@ -9,10 +9,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5563805057027715917}
+  - component: {fileID: 4691018713948771989}
   - component: {fileID: 8502321116601047866}
   - component: {fileID: 6365956202248575469}
   - component: {fileID: 991256978590350193}
-  - component: {fileID: 4691018713948771989}
+  - component: {fileID: -1121488782144986734}
   m_Layer: 0
   m_Name: Asteroid_Large03
   m_TagString: Untagged
@@ -30,11 +31,38 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -3.1993442, y: 2.7835994, z: -0.09124394}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4691018713948771989
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2008391577427198326}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 799fbcc7b914ad1468a539aacedd5377, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  healthMax: 3
+  collisionDamage: 1
+  asteroidVelocity: 0.8
+  asteroidChunks:
+  - {fileID: 4082472932018963504, guid: b64ef9f378cbcb2408714bdf2d25a51e, type: 3}
+  - {fileID: 2428923140451405553, guid: a3e4db3c4b9ce584e89580314747a0c1, type: 3}
+  - {fileID: 562265514404860698, guid: 8d7be979717efce4893b519e20775826, type: 3}
+  - {fileID: 2825977830538826595, guid: b2e39c1f158d78142b84a90b9829ab13, type: 3}
+  - {fileID: 3536935613360764983, guid: 0806e5ea718dc3b46bb89a28f303beb0, type: 3}
+  - {fileID: 3958864720268528133, guid: 471e7f3a4bc8a30409b1259c07b2d6a9, type: 3}
+  chunkMin: 0
+  chunkMax: 5
+  chunkDistance: 1
+  chunkForce: 0.1
+  explosionFX: {fileID: 9119991457998186944, guid: 9e80bf40a52fe1c48b50ffc08133d49b, type: 3}
 --- !u!50 &8502321116601047866
 Rigidbody2D:
   serializedVersion: 5
@@ -51,7 +79,7 @@ Rigidbody2D:
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 0
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 335cc23fb34f46546a5b65058b031b01, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -178,7 +206,7 @@ PolygonCollider2D:
       - {x: 0.30806056, y: -0.09101996}
       - {x: 0.28802085, y: 0.1288181}
   m_UseDelaunayMesh: 0
---- !u!114 &4691018713948771989
+--- !u!114 &-1121488782144986734
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -187,8 +215,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 2008391577427198326}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 799fbcc7b914ad1468a539aacedd5377, type: 3}
+  m_Script: {fileID: 11500000, guid: 78e617a1b9a95a2418bcdaff33c8f0e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  asteroids: []
-  asteroidVelocity: 0

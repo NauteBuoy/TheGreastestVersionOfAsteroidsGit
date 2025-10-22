@@ -25,7 +25,6 @@ public class SpaceshipController : MonoBehaviour
     private float lastDashTime = -10f;
     private float dashTimer = 0f;
     private Vector3 baseScale;
-    private CameraController camShake;
 
     [Header("Bullet Settings")]
     public GameObject bulletObj;
@@ -35,8 +34,8 @@ public class SpaceshipController : MonoBehaviour
     private float fireTimer = 0f;
 
     [Header("Particle Settings")]
-    public ParticleController visualEffects;
-    public GameObject explosionSystem;
+    public GameObject EngineFX;
+    public GameObject explosionFX;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -45,8 +44,6 @@ public class SpaceshipController : MonoBehaviour
         rbShip = GetComponent<Rigidbody2D>();
         rbShip.gravityScale = 0f;
         baseScale = transform.localScale;
-
-        camShake = Camera.main.GetComponent<CameraController>();
     }
 
     // Update is called once per frame
@@ -78,9 +75,7 @@ public class SpaceshipController : MonoBehaviour
 
     public void Explode()
     {
-        camShake?.Shake(0.4f, 0.4f);
-
-        Instantiate(explosionSystem, transform.position, Quaternion.identity);
+        Instantiate(explosionFX, transform.position, Quaternion.identity);
         Destroy(gameObject); // remove the spaceship!
     }
 
@@ -158,8 +153,6 @@ public class SpaceshipController : MonoBehaviour
         
         transform.up = -transform.up;   // Flip instantly 180 degrees around Z
         SquashStretch(-transform.up, false);
-
-        visualEffects?.PauseWaterSpray();
     }
 
     private void SquashStretch(Vector2 direction, bool isSideways)

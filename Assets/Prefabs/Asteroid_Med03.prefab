@@ -9,10 +9,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1020212088024319759}
+  - component: {fileID: 8272412739177956638}
   - component: {fileID: 8472709953720751227}
   - component: {fileID: 5636390060554177426}
   - component: {fileID: 8354512683435766220}
-  - component: {fileID: 8272412739177956638}
+  - component: {fileID: 1196862335438683523}
   m_Layer: 0
   m_Name: Asteroid_Med03
   m_TagString: Untagged
@@ -30,11 +31,35 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -3.1993442, y: 2.7835994, z: -0.09124394}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8272412739177956638
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 562265514404860698}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 799fbcc7b914ad1468a539aacedd5377, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  healthMax: 2
+  collisionDamage: 1
+  asteroidVelocity: 0.8
+  asteroidChunks:
+  - {fileID: 2825977830538826595, guid: b2e39c1f158d78142b84a90b9829ab13, type: 3}
+  - {fileID: 3536935613360764983, guid: 0806e5ea718dc3b46bb89a28f303beb0, type: 3}
+  - {fileID: 3958864720268528133, guid: 471e7f3a4bc8a30409b1259c07b2d6a9, type: 3}
+  chunkMin: 0
+  chunkMax: 2
+  chunkDistance: 1
+  chunkForce: 0.2
+  explosionFX: {fileID: 9119991457998186944, guid: 9e80bf40a52fe1c48b50ffc08133d49b, type: 3}
 --- !u!50 &8472709953720751227
 Rigidbody2D:
   serializedVersion: 5
@@ -174,7 +199,7 @@ PolygonCollider2D:
       - {x: 0.1364407, y: 0.06981683}
       - {x: 0.04956313, y: 0.12531137}
   m_UseDelaunayMesh: 0
---- !u!114 &8272412739177956638
+--- !u!114 &1196862335438683523
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -183,8 +208,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 562265514404860698}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 799fbcc7b914ad1468a539aacedd5377, type: 3}
+  m_Script: {fileID: 11500000, guid: 78e617a1b9a95a2418bcdaff33c8f0e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  asteroids: []
-  asteroidVelocity: 0

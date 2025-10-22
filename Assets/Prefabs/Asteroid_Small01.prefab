@@ -9,10 +9,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 705139671374464512}
+  - component: {fileID: 7920867184670626337}
   - component: {fileID: 1548874881135153912}
   - component: {fileID: 4853188461216603356}
   - component: {fileID: 5936450970066115538}
-  - component: {fileID: 7920867184670626337}
+  - component: {fileID: -397503122476901698}
   m_Layer: 0
   m_Name: Asteroid_Small01
   m_TagString: Untagged
@@ -30,11 +31,33 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -3.1993442, y: 2.7835994, z: -0.09124394}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7920867184670626337
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2825977830538826595}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 799fbcc7b914ad1468a539aacedd5377, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  healthMax: 1
+  collisionDamage: 1
+  asteroidVelocity: 0.8
+  asteroidChunks:
+  - {fileID: 0}
+  chunkMin: 0
+  chunkMax: 1
+  chunkDistance: 1
+  chunkForce: 0.3
+  explosionFX: {fileID: 9119991457998186944, guid: 9e80bf40a52fe1c48b50ffc08133d49b, type: 3}
 --- !u!50 &1548874881135153912
 Rigidbody2D:
   serializedVersion: 5
@@ -170,7 +193,7 @@ PolygonCollider2D:
       - {x: -0.013030324, y: -0.06093671}
       - {x: 0.059173767, y: -0.060851976}
   m_UseDelaunayMesh: 0
---- !u!114 &7920867184670626337
+--- !u!114 &-397503122476901698
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -179,8 +202,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 2825977830538826595}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 799fbcc7b914ad1468a539aacedd5377, type: 3}
+  m_Script: {fileID: 11500000, guid: 78e617a1b9a95a2418bcdaff33c8f0e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  asteroids: []
-  asteroidVelocity: 0
