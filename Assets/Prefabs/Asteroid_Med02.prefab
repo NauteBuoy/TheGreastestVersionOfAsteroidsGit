@@ -30,8 +30,8 @@ Transform:
   m_GameObject: {fileID: 2428923140451405553}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.1993442, y: 2.7835994, z: -0.09124394}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -51,15 +51,16 @@ MonoBehaviour:
   healthMax: 2
   collisionDamage: 1
   asteroidVelocity: 0.8
+  asteroidValue: 3
   asteroidChunks:
   - {fileID: 2825977830538826595, guid: b2e39c1f158d78142b84a90b9829ab13, type: 3}
   - {fileID: 3536935613360764983, guid: 0806e5ea718dc3b46bb89a28f303beb0, type: 3}
   - {fileID: 3958864720268528133, guid: 471e7f3a4bc8a30409b1259c07b2d6a9, type: 3}
+  explosionFX: {fileID: 9119991457998186944, guid: 9e80bf40a52fe1c48b50ffc08133d49b, type: 3}
   chunkMin: 0
   chunkMax: 2
   chunkDistance: 1
   chunkForce: 0.2
-  explosionFX: {fileID: 9119991457998186944, guid: 9e80bf40a52fe1c48b50ffc08133d49b, type: 3}
 --- !u!50 &4760734200984124093
 Rigidbody2D:
   serializedVersion: 5

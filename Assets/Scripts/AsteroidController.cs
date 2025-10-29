@@ -7,18 +7,17 @@ public class AsteroidController : MonoBehaviour
     private float healthCurrent;
     public float collisionDamage = 1f;
     public float asteroidVelocity = 3f;
+    public int asteroidValue = 3;
 
     [Header("Asteroid Chunks")]
     public GameObject[] asteroidChunks;
 
-    [Header("Chunk Settings")]
+    [Header("Chunk Explosion Settings")]
+    public GameObject explosionFX;
     public int chunkMin = 0;
     public int chunkMax = 5;
     public float chunkDistance = 0.5f;
     public float chunkForce = 10f;
-
-    [Header("Particle Settings")]
-    public GameObject explosionFX;
 
     [Header("Private Settings")]
     private Rigidbody2D rb2d;
@@ -58,12 +57,6 @@ public class AsteroidController : MonoBehaviour
             BreakApart();
         }
     }
-
-    //private void OnTriggerEnter2D(Collider2D collision)
-    //{
-    //    BreakApart();
-    //    Destroy(gameObject);
-    //}
 
     private void BreakApart()
     {

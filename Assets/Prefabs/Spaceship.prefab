@@ -4843,7 +4843,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2356628942725642436}
   - component: {fileID: 109561785298019068}
-  - component: {fileID: 9114864416598855991}
   - component: {fileID: 5186663330124563024}
   - component: {fileID: 2012345043519161284}
   - component: {fileID: 3369900507856224546}
@@ -4865,7 +4864,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
+  m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 505661011435303134}
@@ -4898,25 +4897,8 @@ MonoBehaviour:
   bulletOffset: 0.25
   bulletSpeed: 100
   fireRate: 0.33
-  visualEffects: {fileID: 0}
+  EngineFX: {fileID: 0}
   explosionFX: {fileID: 9119991457998186944, guid: 9e80bf40a52fe1c48b50ffc08133d49b, type: 3}
---- !u!114 &9114864416598855991
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5073917542897289987}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4fcb90dc895bf3d4fba26eacf7500d88, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  waterSpray: {fileID: 299801913139558650}
-  dashSpray: {fileID: 8851257298489590649}
-  ripple: {fileID: 6535805864992099440}
-  waterSprayReductionTime: 0.15
-  minSprayVelocity: 0.05
 --- !u!114 &5186663330124563024
 MonoBehaviour:
   m_ObjectHideFlags: 0
