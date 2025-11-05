@@ -33,9 +33,12 @@ public class SpaceshipController : MonoBehaviour
     public float fireRate = 0.33f;
     private float fireTimer = 0f;
 
-    [Header("Particle Settings")]
+    [Header("FX Settings")]
     public GameObject EngineFX;
     public GameObject explosionFX;
+    public ScreenFlashController screenFlash;
+    public CameraShakeController cameraShake;
+    public float screenShakeMultiplier = 1f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -67,6 +70,10 @@ public class SpaceshipController : MonoBehaviour
     public void TakeDamage(float damage)
     {
         healthCurrent = healthCurrent - damage;
+
+        //StartCoroutine(screenFlash.FlashRoutine());
+        //StartCoroutine(cameraShake.ShakeRoutine());
+
         if (healthCurrent <= 0)
         {
             Explode();
@@ -116,7 +123,9 @@ public class SpaceshipController : MonoBehaviour
         }
         else if (Input.GetKeyDown(KeyCode.X))
         {
-            QuickTurn();                // flip 180
+            QuickTurn();// flip 180
+            StartCoroutine(screenFlash.FlashRoutine());
+            cameraShake.StartSceenShake(screenShakeMultiplier);
         }
     }
 
