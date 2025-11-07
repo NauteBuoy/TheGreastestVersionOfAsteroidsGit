@@ -10,11 +10,12 @@ GameObject:
   m_Component:
   - component: {fileID: 3312404791649311618}
   - component: {fileID: 2877771525834049163}
+  - component: {fileID: 9087917725350925182}
   - component: {fileID: 2161476553140114529}
   - component: {fileID: 8169958173476963081}
   - component: {fileID: 4802297763756656630}
   - component: {fileID: -1521166770879305088}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Asteroid_Small03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -31,7 +32,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -48,17 +49,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 799fbcc7b914ad1468a539aacedd5377, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  healthMax: 1
+  healthMax: 3
   collisionDamage: 1
-  asteroidVelocity: 0.8
-  asteroidValue: 3
+  asteroidVelocity: 1
+  asteroidValue: 2
   asteroidChunks:
   - {fileID: 0}
   explosionFX: {fileID: 9119991457998186944, guid: 9e80bf40a52fe1c48b50ffc08133d49b, type: 3}
   chunkMin: 0
-  chunkMax: 1
-  chunkDistance: 1
-  chunkForce: 0.3
+  chunkMax: 3
+  chunkDistance: 2
+  chunkForce: 1
+--- !u!114 &9087917725350925182
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3958864720268528133}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fc4e55b480881a4bb4b7edd07332e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isCaptured: 0
+  orbitTarget: {fileID: 0}
+  orbitSpeed: 2
+  orbitDistance: 1
+  pullStrength: 3
+  isPulled: 0
+  pullRadius: 0
 --- !u!50 &2161476553140114529
 Rigidbody2D:
   serializedVersion: 5

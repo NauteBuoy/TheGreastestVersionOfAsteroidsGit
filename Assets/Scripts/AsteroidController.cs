@@ -20,18 +20,18 @@ public class AsteroidController : MonoBehaviour
     public float chunkForce = 10f;
 
     [Header("Private Settings")]
-    private Rigidbody2D rb2d;
+    private Rigidbody2D rbAsteroid;
 
     private void Awake()
     {
         healthCurrent = healthMax;
-        rb2d = GetComponent<Rigidbody2D>();
+        rbAsteroid = GetComponent<Rigidbody2D>();
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        rb2d.AddForce(new Vector2(Random.Range(-asteroidVelocity, asteroidVelocity), Random.Range(-asteroidVelocity, asteroidVelocity)), ForceMode2D.Impulse);
+        rbAsteroid.AddForce(new Vector2(Random.Range(-asteroidVelocity, asteroidVelocity), Random.Range(-asteroidVelocity, asteroidVelocity)), ForceMode2D.Impulse);
     }
 
     // Update is called once per frame
@@ -45,7 +45,7 @@ public class AsteroidController : MonoBehaviour
         SpaceshipController spaceship = collision.gameObject.gameObject.GetComponent<SpaceshipController>();
         if (spaceship != null)
         {
-            spaceship.TakeDamage(collisionDamage);
+            //spaceship.TakeDamage(collisionDamage);
         }
     }
 

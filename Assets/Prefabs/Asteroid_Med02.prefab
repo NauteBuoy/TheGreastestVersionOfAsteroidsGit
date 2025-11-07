@@ -10,11 +10,12 @@ GameObject:
   m_Component:
   - component: {fileID: 5102629459082251143}
   - component: {fileID: 3861983713974275150}
+  - component: {fileID: -2151946367966943659}
   - component: {fileID: 4760734200984124093}
   - component: {fileID: 23107027619934854}
   - component: {fileID: 6012888706047256938}
   - component: {fileID: 5121667413857484898}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Asteroid_Med02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -31,7 +32,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
+  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -48,19 +49,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 799fbcc7b914ad1468a539aacedd5377, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  healthMax: 2
+  healthMax: 3
   collisionDamage: 1
-  asteroidVelocity: 0.8
-  asteroidValue: 3
+  asteroidVelocity: 1
+  asteroidValue: 2
   asteroidChunks:
   - {fileID: 2825977830538826595, guid: b2e39c1f158d78142b84a90b9829ab13, type: 3}
   - {fileID: 3536935613360764983, guid: 0806e5ea718dc3b46bb89a28f303beb0, type: 3}
   - {fileID: 3958864720268528133, guid: 471e7f3a4bc8a30409b1259c07b2d6a9, type: 3}
   explosionFX: {fileID: 9119991457998186944, guid: 9e80bf40a52fe1c48b50ffc08133d49b, type: 3}
   chunkMin: 0
-  chunkMax: 2
-  chunkDistance: 1
-  chunkForce: 0.2
+  chunkMax: 3
+  chunkDistance: 2
+  chunkForce: 1
+--- !u!114 &-2151946367966943659
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2428923140451405553}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fc4e55b480881a4bb4b7edd07332e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isCaptured: 0
+  orbitTarget: {fileID: 0}
+  orbitSpeed: 2
+  orbitDistance: 1
+  pullStrength: 3
+  isPulled: 0
+  pullRadius: 0
 --- !u!50 &4760734200984124093
 Rigidbody2D:
   serializedVersion: 5
