@@ -1,28 +1,39 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
 
 public class DebrisController : MonoBehaviour
 {
-    [Header("Capture Settings")]
-    public bool isCaptured = false;
-    [HideInInspector] public Transform orbitTarget;
-    public float orbitSpeed = 5f;
-    public float orbitDistance = 2f;
-    public float pullStrength = 5f;
+    [Header("Orbit Settings")]
+    public Transform orbitTarget; //assigned while in gravityRadius
+    public bool isInOrbit = false;
+    public float orbitSpeed = 60f; //degrees per second
+    public float orbitRadiusMultiplier = 1f; //how far from orbit pivot
+    public float orbitSnapDuration = 0.15f; //time to snap into orbit
+    public float orbitFollowSpeed = 5f; //how fast debris follows gravity target
+
+    [Header("Capture Progress")]
+    public float captureProgress = 0f;
+    public float captureTime = 3f; //seconds to lock-on to gravity target
 
     [Header("Private Settings")]
     private Rigidbody2D rbDebris;
     private float currentOrbitAngle;
+    private Collider2D colDebris;
+    private Vector2 initialDebrisVelocity;
 
-    [Header("Pull Settings")]
+    // optional legacy pull vars (unused by current flow, keep for future)
+    [Header("LEGACY Pull Settings")]
+    [HideInInspector] public float pullStrength;
     [HideInInspector] public bool isPulled = false;
     [HideInInspector] public float pullRadius;
-    public float pullDuration = 0.2f;
+    [HideInInspector] public float pullDuration;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         rbDebris = GetComponent<Rigidbody2D>();
+        initialDebrisVelocity = rbDebris.linearVelocity;
     }
 
     // Update is called once per frame
@@ -33,76 +44,155 @@ public class DebrisController : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (isPulled && !isCaptured)
+        //while capturing, slow down debris slightly
+        if (!isInOrbit && orbitTarget != null && captureProgress > 0)
         {
-            if (orbitTarget != null)
-                Debug.DrawLine(transform.position, orbitTarget.position, Color.cyan);
-
-            //Start pull toward player
-            Vector2 direction = (orbitTarget.position - transform.position);
-            float distanceToPlayer = direction.magnitude;
-
-            if (distanceToPlayer > pullRadius * 0.8f)
-                rbDebris.linearVelocity *= 0.95f; // slow down near edge
-
-            if (distanceToPlayer > 0.1f)
-            {
-                //Stronger pull when closer, weaker when far 
-                float pullForce = pullStrength / Mathf.Max(0.5f, distanceToPlayer);
-                rbDebris.AddForce(direction.normalized * pullForce, ForceMode2D.Force);
-            }
+            //slow down slightly for capturing
+            float slowdownFactor = Mathf.Lerp(1f, 0.98f, captureProgress / captureTime);
+            rbDebris.linearVelocity *= slowdownFactor;
         }
-        else
+
+        //if captured, orbit around the gravity target
+        if (isInOrbit && orbitTarget != null)
         {
-            //Once captured, orbit around player
-            currentOrbitAngle += orbitSpeed * Time.fixedDeltaTime;
-            Vector2 orbitOffset = new Vector2(Mathf.Cos(currentOrbitAngle), Mathf.Sin(currentOrbitAngle));
+            //get player speed
+            float playerSpeed = orbitTarget.GetComponent<Rigidbody2D>().linearVelocity.magnitude;
 
-            Vector2 targetPos = (Vector2)orbitTarget.position + orbitOffset * orbitDistance;
-            transform.position = Vector2.Lerp(transform.position, targetPos, Time.fixedDeltaTime * orbitSpeed);
+            //slow orbit when player moves
+            float orbitMultiplier = Mathf.Clamp(1f - playerSpeed * 0.05f, 0.5f, 1f);
+
+            //add slight random variation
+            float randomFactor = Random.Range(0.9f, 1.1f);
+
+            currentOrbitAngle += orbitSpeed * Time.fixedDeltaTime * orbitMultiplier * randomFactor * Mathf.Deg2Rad;
+
+            //orbit offset around pivot
+            Vector2 orbitOffset = new Vector2(Mathf.Cos(currentOrbitAngle), Mathf.Sin(currentOrbitAngle)) * orbitRadiusMultiplier;
+            Vector2 targetPos = (Vector2)orbitTarget.localPosition + orbitOffset;
+
+            //lerp and follow the orbit position
+            transform.position = Vector2.Lerp(transform.position, targetPos, Time.fixedDeltaTime * orbitFollowSpeed);
         }
     }
 
-    public void StartPull(Transform target, float radius)
+    public void UpdateCapture(Transform orbitPivot, float gravityEngineRadius)
     {
-        orbitTarget = target;
-        pullRadius = radius;
-        isPulled = true;
+        if (isInOrbit)  
+            return;;
+
+        //assign pivot
+        orbitTarget = orbitPivot;
+
+        float distance = Vector2.Distance(transform.position, orbitTarget.position);
+
+        //if inside gravityEngineRadius, increase capture progress
+        if (distance < gravityEngineRadius)
+        {
+            captureProgress += Time.deltaTime;
+        }
+        else 
+        {
+            float before = captureProgress;
+
+            //decay if outside of gravityEngineRadius
+            captureProgress = Mathf.Max(0f, captureProgress - Time.deltaTime * 0.5f); 
+
+            // Restore velocity gradually
+            rbDebris.linearVelocity = Vector2.Lerp(rbDebris.linearVelocity, initialDebrisVelocity, Time.deltaTime * 50f);
+        }
+
+        //if capture progress 100%, lock on and capture
+        if (captureProgress >= captureTime)
+        {
+            Capture(orbitTarget);
+        }
     }
 
-    public void StopPull()
+    public void Capture(Transform orbitPivot)
     {
-        isPulled = false;
-        orbitTarget = null;
-    }
+        if (isInOrbit)  
+            return;
 
-    public void Capture(Transform target)
-    {
-        orbitTarget = target;
-        isCaptured = true;
+        //assign pivot
+        orbitTarget = orbitPivot;
+        isInOrbit = true;
+
+        //stop physics
+        rbDebris.bodyType = RigidbodyType2D.Kinematic;
         rbDebris.linearVelocity = Vector2.zero;
 
-        // Randomize their starting orbit angle (based on current position)
+        //switch collider to trigger to not block player or each other
+        Collider2D colDebris = GetComponent<Collider2D>();
+        if (colDebris != null)  
+            colDebris.isTrigger = true;
+
+        //calculate starting orbit angle based on current position
         Vector2 dirFromTarget = (transform.position - orbitTarget.position).normalized;
         currentOrbitAngle = Mathf.Atan2(dirFromTarget.y, dirFromTarget.x);
 
-        StartCoroutine(MoveIntoOrbit());
+        //snap into orbit smoothly (coroutine)
+        StartCoroutine(MoveIntoOrbitRoutine());
     }
 
-    private IEnumerator MoveIntoOrbit()
+    private IEnumerator MoveIntoOrbitRoutine()
     {
         float elapsed = 0f;
-        float duration = pullDuration;
+        float duration = Mathf.Max(0.01f, orbitSnapDuration);
+
         Vector3 startPos = transform.position;
-        Vector3 targetPos = orbitTarget.position + (transform.position - orbitTarget.position).normalized * orbitDistance;
+
+
+        // Calculate direction safely
+        Vector3 dirFromTarget = (transform.position - orbitTarget.position);
+        if (dirFromTarget.sqrMagnitude < 0.01f) // too close, set a default
+            dirFromTarget = Vector3.right;
+
+
+
+        Vector3 targetPos = orbitTarget.position + (transform.position - orbitTarget.position).normalized * orbitRadiusMultiplier;
 
         while (elapsed < duration)
         {
-           transform.position = Vector3.Lerp(startPos, targetPos, elapsed / duration);
+            transform.position = Vector3.Lerp(startPos, targetPos, elapsed / duration);
             elapsed += Time.deltaTime;
             yield return null;
         }
 
         transform.position = targetPos;
+    }
+
+    public void SetOrbitAngle(float angle)
+    {
+        currentOrbitAngle = angle;
+    }
+
+    //private void OnTriggerEnter2D(Collider2D other)
+    //{
+    //    // Optional hook: if you want the debris to damage stuff while orbiting, implement this:
+    //    // Example: notify player or enemies - handle damage logic elsewhere
+    //    // if (other.CompareTag("Enemy")) { /* apply damage */ }
+    //}
+
+    //public void Release(Vector2 impulse)
+    //{
+    //    //isInOrbit = false;
+    //    //captureProgress = 0f;
+
+    //    ////restore physics & collider
+    //    //rbDebris.bodyType = RigidbodyType2D.Dynamic;
+    //    //if (colDebris != null) colDebris.isTrigger = false;
+
+    //    ////give it a push away
+    //    //rbDebris.linearVelocity = impulse;
+    //}
+
+    private void OnDrawGizmos()
+    {
+        if (orbitTarget != null)
+        {
+            float distance = Vector2.Distance(transform.position, orbitTarget.position);
+            Gizmos.color = distance < 3f ? Color.cyan : Color.red;
+            Gizmos.DrawLine(transform.position, orbitTarget.position);
+        }
     }
 }

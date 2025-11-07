@@ -154,9 +154,9 @@ public class SpaceshipController : MonoBehaviour
     private void ApplyTorque(float amount)
     {
         float rotation = amount * Time.fixedDeltaTime * rotationPower;
-        //rbShip.AddTorque(-rotation);
+        rbShip.AddTorque(-rotation);
 
-        rbShip.MoveRotation(rbShip.rotation - rotation);
+        //rbShip.MoveRotation(rbShip.rotation - rotation);
     }
 
     private void ClampVelocity()

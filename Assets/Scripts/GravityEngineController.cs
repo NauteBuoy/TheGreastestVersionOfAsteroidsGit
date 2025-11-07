@@ -1,15 +1,16 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using UnityEngine;
 
 public class GravityEngineController : MonoBehaviour
 {
-    public float pullRadius = 5f;
-    public float captureRadius = 1.5f;
+    [Header("Gravity Engine Settings")]
+    public float gravityEngineRadius = 3f; //gravity influence radius (bigger)
     public LayerMask debrisMask;
 
-    List<DebrisController> capturedDebris = new List<DebrisController>();
+    [Header("List Settings")]
+    public List<DebrisController> trackedDebris = new List<DebrisController>();
+    public List<DebrisController> capturedDebris = new List<DebrisController>();
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -25,44 +26,71 @@ public class GravityEngineController : MonoBehaviour
 
     void FixedUpdate()
     {
-        Collider2D[] debrisInRange = Physics2D.OverlapCircleAll(transform.position, pullRadius, debrisMask);
-        HashSet<DebrisController> debrisInPullRange = new HashSet<DebrisController>();
+        Collider2D[] debrisInGravityRange = Physics2D.OverlapCircleAll(transform.position, gravityEngineRadius, debrisMask);
+        HashSet<DebrisController> influencedDebris = new HashSet<DebrisController>();
 
-        foreach (var debrisPiece in debrisInRange)
+        foreach (var gravityDebris in debrisInGravityRange)
         {
-            DebrisController debris = debrisPiece.GetComponent<DebrisController>();
-            if (!debris) 
+            DebrisController debris = gravityDebris.GetComponent<DebrisController>();
+            if (!gravityDebris)
                 continue;
 
-            debrisInPullRange.Add(debris);
+            influencedDebris.Add(debris);
 
-            if (!debris.isCaptured)
-                debris.StartPull(transform, pullRadius);
+            //if not already tracked, add it
+            if (!trackedDebris.Contains(debris))
+                trackedDebris.Add(debris);
 
-            float distance = Vector2.Distance(transform.position, debris.transform.position);
-
-            if (distance < captureRadius && !debris.isCaptured)
-            {
-                debris.Capture(transform);
-                capturedDebris.Add(debris);
-            }
+            debris.UpdateCapture(transform, gravityEngineRadius);
         }
 
-        foreach (var debris in Object.FindObjectsByType<DebrisController>(FindObjectsSortMode.None))
+        for (int i = trackedDebris.Count - 1; i >= 0; i--)
         {
-            float distance = Vector2.Distance(transform.position, debris.transform.position);
+            DebrisController debris = trackedDebris[i];
+            if (debris == null)
+            {
+                trackedDebris.RemoveAt(i);
+                continue;
+            }
 
-            if (!debrisInPullRange.Contains(debris) && debris.isPulled && !debris.isCaptured)
-                debris.StopPull();
+            if (!influencedDebris.Contains(debris))
+            {
+                debris.UpdateCapture(transform, gravityEngineRadius);
+
+                // Stop tracking once fully reset
+                if (debris.captureProgress <= 0)
+                    trackedDebris.RemoveAt(i);
+            }
+
+            if (influencedDebris.isInOrbit && !capturedDebris.Contains(influencedDebris))
+            {
+                capturedDebris.Add(influencedDebris);
+                UpdateOrbitSpacing();
+            }
+        }
+    }
+
+    void UpdateOrbitSpacing()
+    {
+        int count = capturedDebris.Count;
+        if (count == 0)     
+            return;
+
+        float angleStep = 360f / count;
+
+        for (int i = 0; i < count; i++)
+        {
+            if (capturedDebris[i] == null) 
+                continue;
+
+            float angle = angleStep * i * Mathf.Deg2Rad;
+            capturedDebris[i].SetOrbitAngle(angle);
         }
     }
 
     void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, pullRadius);
-
-        Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(transform.position, captureRadius);
+        Gizmos.DrawWireSphere(transform.position, gravityEngineRadius);
     }
 }
