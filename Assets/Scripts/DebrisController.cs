@@ -1,5 +1,4 @@
 using System.Collections;
-using TMPro;
 using UnityEngine;
 
 public class DebrisController : MonoBehaviour
@@ -8,7 +7,7 @@ public class DebrisController : MonoBehaviour
     public Transform orbitTarget; //assigned while in gravityRadius
     public bool isInOrbit = false;
     public float orbitSpeed = 60f; //degrees per second
-    public float orbitRadiusMultiplier = 1f; //how far from orbit pivot
+    //public float orbitRadiusMultiplier = 1f; //how far from orbit pivot
     public float orbitSnapDuration = 0.15f; //time to snap into orbit
     public float orbitFollowSpeed = 5f; //how fast debris follows gravity target
 
@@ -17,23 +16,24 @@ public class DebrisController : MonoBehaviour
     public float captureTime = 3f; //seconds to lock-on to gravity target
 
     [Header("Private Settings")]
+    [HideInInspector] public float orbitAngleOffset;
+    [HideInInspector] public float currentOrbitRadius;
+    [HideInInspector] public float rotationAccumulator = 0f; // increments each FixedUpdate to rotate
+
     private Rigidbody2D rbDebris;
-    private float currentOrbitAngle;
-    private Collider2D colDebris;
     private Vector2 initialDebrisVelocity;
 
     // optional legacy pull vars (unused by current flow, keep for future)
     [Header("LEGACY Pull Settings")]
-    [HideInInspector] public float pullStrength;
-    [HideInInspector] public bool isPulled = false;
-    [HideInInspector] public float pullRadius;
-    [HideInInspector] public float pullDuration;
+    public float pullStrength = 10f;
+    //[HideInInspector] public bool isPulled = false;
+    //[HideInInspector] public float pullRadius;
+    //[HideInInspector] public float pullDuration;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         rbDebris = GetComponent<Rigidbody2D>();
-        initialDebrisVelocity = rbDebris.linearVelocity;
     }
 
     // Update is called once per frame
@@ -44,14 +44,6 @@ public class DebrisController : MonoBehaviour
 
     void FixedUpdate()
     {
-        //while capturing, slow down debris slightly
-        if (!isInOrbit && orbitTarget != null && captureProgress > 0)
-        {
-            //slow down slightly for capturing
-            float slowdownFactor = Mathf.Lerp(1f, 0.98f, captureProgress / captureTime);
-            rbDebris.linearVelocity *= slowdownFactor;
-        }
-
         //if captured, orbit around the gravity target
         if (isInOrbit && orbitTarget != null)
         {
@@ -59,16 +51,16 @@ public class DebrisController : MonoBehaviour
             float playerSpeed = orbitTarget.GetComponent<Rigidbody2D>().linearVelocity.magnitude;
 
             //slow orbit when player moves
-            float orbitMultiplier = Mathf.Clamp(1f - playerSpeed * 0.05f, 0.5f, 1f);
+            float orbitMultiplier = Mathf.Clamp(1f - playerSpeed * 0.05f, 0.4f, 1f);
 
-            //add slight random variation
-            float randomFactor = Random.Range(0.9f, 1.1f);
-
-            currentOrbitAngle += orbitSpeed * Time.fixedDeltaTime * orbitMultiplier * randomFactor * Mathf.Deg2Rad;
+            // advance rotation accumulator (radians)
+            rotationAccumulator += orbitSpeed * Mathf.Deg2Rad * Time.fixedDeltaTime * orbitMultiplier;
+            // final angle = base phase offset + rotation accumulator
+            float angle = orbitAngleOffset + rotationAccumulator;
 
             //orbit offset around pivot
-            Vector2 orbitOffset = new Vector2(Mathf.Cos(currentOrbitAngle), Mathf.Sin(currentOrbitAngle)) * orbitRadiusMultiplier;
-            Vector2 targetPos = (Vector2)orbitTarget.localPosition + orbitOffset;
+            Vector2 orbitOffset = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * currentOrbitRadius;
+            Vector2 targetPos = (Vector2)orbitTarget.position + orbitOffset;
 
             //lerp and follow the orbit position
             transform.position = Vector2.Lerp(transform.position, targetPos, Time.fixedDeltaTime * orbitFollowSpeed);
@@ -77,31 +69,41 @@ public class DebrisController : MonoBehaviour
 
     public void UpdateCapture(Transform orbitPivot, float gravityEngineRadius)
     {
+        //this function handles everything: progress, decay, and restoring velocity
         if (isInOrbit)  
-            return;;
+            return;
 
         //assign pivot
         orbitTarget = orbitPivot;
-
         float distance = Vector2.Distance(transform.position, orbitTarget.position);
 
         //if inside gravityEngineRadius, increase capture progress
         if (distance < gravityEngineRadius)
         {
+            if (captureProgress == 0f) //store initial velocity first frame inside radius
+                initialDebrisVelocity = rbDebris.linearVelocity;
+
+            //increase capture
             captureProgress += Time.deltaTime;
+
+            //slow down slightly for capturing
+            float slowdownFactor = Mathf.Lerp(1f, 0.98f, captureProgress / captureTime);
+            rbDebris.linearVelocity *= slowdownFactor;
+
+            //apply gravity pull towards the center
+            Vector2 directionToCenter = ((Vector2)orbitTarget.position - (Vector2)transform.position).normalized;
+            rbDebris.AddForce(directionToCenter * pullStrength, ForceMode2D.Force);
         }
-        else 
+        else
         {
-            float before = captureProgress;
-
             //decay if outside of gravityEngineRadius
-            captureProgress = Mathf.Max(0f, captureProgress - Time.deltaTime * 0.5f); 
+            captureProgress = Mathf.Max(0f, captureProgress - Time.deltaTime * 0.5f);
 
-            // Restore velocity gradually
-            rbDebris.linearVelocity = Vector2.Lerp(rbDebris.linearVelocity, initialDebrisVelocity, Time.deltaTime * 50f);
+            //restore initial velocity with a slight multiplier for overshoot
+            Vector2 targetVelocity = initialDebrisVelocity * 1.05f; // 5% faster than initial speed
+            rbDebris.linearVelocity = Vector2.Lerp(rbDebris.linearVelocity, targetVelocity, Time.deltaTime * orbitFollowSpeed);
         }
 
-        //if capture progress 100%, lock on and capture
         if (captureProgress >= captureTime)
         {
             Capture(orbitTarget);
@@ -128,7 +130,11 @@ public class DebrisController : MonoBehaviour
 
         //calculate starting orbit angle based on current position
         Vector2 dirFromTarget = (transform.position - orbitTarget.position).normalized;
-        currentOrbitAngle = Mathf.Atan2(dirFromTarget.y, dirFromTarget.x);
+        rotationAccumulator = Mathf.Atan2(dirFromTarget.y, dirFromTarget.x);
+
+        // randomize follow speed slightly for natural effect
+        float randomFactor = Random.Range(0.95f, 1.05f);
+        orbitFollowSpeed = orbitFollowSpeed * randomFactor;
 
         //snap into orbit smoothly (coroutine)
         StartCoroutine(MoveIntoOrbitRoutine());
@@ -141,15 +147,12 @@ public class DebrisController : MonoBehaviour
 
         Vector3 startPos = transform.position;
 
-
         // Calculate direction safely
         Vector3 dirFromTarget = (transform.position - orbitTarget.position);
         if (dirFromTarget.sqrMagnitude < 0.01f) // too close, set a default
             dirFromTarget = Vector3.right;
 
-
-
-        Vector3 targetPos = orbitTarget.position + (transform.position - orbitTarget.position).normalized * orbitRadiusMultiplier;
+        Vector3 targetPos = orbitTarget.position + dirFromTarget.normalized * GravityEngineController.Instance.orbitRadius;
 
         while (elapsed < duration)
         {
@@ -161,9 +164,9 @@ public class DebrisController : MonoBehaviour
         transform.position = targetPos;
     }
 
-    public void SetOrbitAngle(float angle)
+    public void SetOrbitRadius(float radius)
     {
-        currentOrbitAngle = angle;
+        currentOrbitRadius = radius;
     }
 
     //private void OnTriggerEnter2D(Collider2D other)

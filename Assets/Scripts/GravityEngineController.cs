@@ -1,21 +1,26 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class GravityEngineController : MonoBehaviour
 {
+    public static GravityEngineController Instance;
+
     [Header("Gravity Engine Settings")]
-    public float gravityEngineRadius = 3f; //gravity influence radius (bigger)
+    public float gravityEngineRadius = 3f; //gravity influence radius
     public LayerMask debrisMask;
 
-    [Header("List Settings")]
+    [Header("Tracking")]
     public List<DebrisController> trackedDebris = new List<DebrisController>();
-    public List<DebrisController> capturedDebris = new List<DebrisController>();
+
+    [Header("Orbit Spacing")]
+    public float orbitRadius = 1.5f;
+    public float orbitRadiusSpacing = 0.3f;
+    //public float spacingLerpSpeed = 2f; //how fast spacing adjusts
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        Instance = this;
     }
 
     // Update is called once per frame
@@ -26,65 +31,49 @@ public class GravityEngineController : MonoBehaviour
 
     void FixedUpdate()
     {
+        //find all debris within radius
         Collider2D[] debrisInGravityRange = Physics2D.OverlapCircleAll(transform.position, gravityEngineRadius, debrisMask);
-        HashSet<DebrisController> influencedDebris = new HashSet<DebrisController>();
 
         foreach (var gravityDebris in debrisInGravityRange)
         {
             DebrisController debris = gravityDebris.GetComponent<DebrisController>();
-            if (!gravityDebris)
+            if (!debris)
                 continue;
 
-            influencedDebris.Add(debris);
-
-            //if not already tracked, add it
+            //check for new tracked debris
             if (!trackedDebris.Contains(debris))
                 trackedDebris.Add(debris);
-
-            debris.UpdateCapture(transform, gravityEngineRadius);
         }
 
+        // update orbit spacing if more than one debris is captured
+        UpdateOrbitSpacing();
+    }
+
+    void UpdateOrbitSpacing()
+    {
+        int count = trackedDebris.Count;
         for (int i = trackedDebris.Count - 1; i >= 0; i--)
         {
             DebrisController debris = trackedDebris[i];
-            if (debris == null)
+            if (!debris)
             {
                 trackedDebris.RemoveAt(i);
                 continue;
             }
 
-            if (!influencedDebris.Contains(debris))
-            {
-                debris.UpdateCapture(transform, gravityEngineRadius);
+            //update capture/decay/pull on every tracked debris
+            debris.UpdateCapture(transform, gravityEngineRadius);
 
-                // Stop tracking once fully reset
-                if (debris.captureProgress <= 0)
-                    trackedDebris.RemoveAt(i);
-            }
-
-            if (influencedDebris.isInOrbit && !capturedDebris.Contains(influencedDebris))
-            {
-                capturedDebris.Add(influencedDebris);
-                UpdateOrbitSpacing();
-            }
-        }
-    }
-
-    void UpdateOrbitSpacing()
-    {
-        int count = capturedDebris.Count;
-        if (count == 0)     
-            return;
-
-        float angleStep = 360f / count;
-
-        for (int i = 0; i < count; i++)
-        {
-            if (capturedDebris[i] == null) 
+            if (!debris.isInOrbit)  
                 continue;
 
-            float angle = angleStep * i * Mathf.Deg2Rad;
-            capturedDebris[i].SetOrbitAngle(angle);
+            //evenly distribute captured debris
+            float angleOffset = (2 * Mathf.PI / count) * i;
+            debris.orbitAngleOffset = angleOffset;
+
+            //smoothly adjust orbit radius
+            float targetRadius = orbitRadius + i * orbitRadiusSpacing;
+            debris.SetOrbitRadius(targetRadius);
         }
     }
 
