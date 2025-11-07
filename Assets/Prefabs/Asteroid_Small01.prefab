@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 705139671374464512}
   - component: {fileID: 7920867184670626337}
-  - component: {fileID: 7878111676156029242}
+  - component: {fileID: 5205180368056902900}
   - component: {fileID: 1548874881135153912}
   - component: {fileID: 4853188461216603356}
   - component: {fileID: 5936450970066115538}
@@ -51,7 +51,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   healthMax: 3
   collisionDamage: 1
-  asteroidVelocity: 1
+  asteroidVelocity: 3
   asteroidValue: 2
   asteroidChunks:
   - {fileID: 0}
@@ -60,7 +60,7 @@ MonoBehaviour:
   chunkMax: 3
   chunkDistance: 2
   chunkForce: 1
---- !u!114 &7878111676156029242
+--- !u!114 &5205180368056902900
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -72,13 +72,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fc4e55b480881a4bb4b7edd07332e28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isCaptured: 0
   orbitTarget: {fileID: 0}
-  orbitSpeed: 2
-  orbitDistance: 1
-  pullStrength: 3
-  isPulled: 0
-  pullRadius: 0
+  isInOrbit: 0
+  orbitSpeed: 100
+  orbitSnapDuration: 0.1
+  orbitFollowSpeed: 4
+  captureProgress: 0
+  captureTime: 3
+  orbitAngleOffset: 0
+  currentOrbitRadius: 0
+  rotationAccumulator: 0
+  pullStrength: 4
 --- !u!50 &1548874881135153912
 Rigidbody2D:
   serializedVersion: 5
@@ -93,7 +97,7 @@ Rigidbody2D:
   m_UseAutoMass: 0
   m_Mass: 0.3
   m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_AngularDamping: 0
   m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
