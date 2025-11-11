@@ -10,10 +10,11 @@ GameObject:
   m_Component:
   - component: {fileID: 2356628942725642436}
   - component: {fileID: 109561785298019068}
+  - component: {fileID: 5463321455532208039}
+  - component: {fileID: 4213149413820993017}
   - component: {fileID: 5186663330124563024}
   - component: {fileID: 2012345043519161284}
   - component: {fileID: 3369900507856224546}
-  - component: {fileID: 4213149413820993017}
   m_Layer: 0
   m_Name: Spaceship
   m_TagString: Untagged
@@ -48,9 +49,57 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4445d97f37151e54cb88909404cd0fb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enginePower: 200
-  rotationPower: 6
-  maxVelocity: 4
+  thrustForce: 1200
+  rotationSpeed: 600
+  maxVelocity: 6
+--- !u!114 &5463321455532208039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5073917542897289987}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 849bdf5b984e283419edb1dd7ba145cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gravityRadius: 3
+  gravityStrength: 3
+  orbitRadius: 1
+  playerSpeedThreshold: 6
+  reentryDelay: 1
+  trackedDebris: []
+  debrisMask:
+    serializedVersion: 2
+    m_Bits: 64
+--- !u!50 &4213149413820993017
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5073917542897289987}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 1
+  m_AngularDamping: 200
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 1
+  m_SleepingMode: 1
+  m_CollisionDetection: 1
+  m_Constraints: 0
 --- !u!114 &5186663330124563024
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -163,7 +212,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 7851470227991654557, guid: 157a3fb6c2d096d4c93b3a8900b907fb, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.882353, g: 0.882353, b: 0.882353, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -173,30 +222,3 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!50 &4213149413820993017
-Rigidbody2D:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5073917542897289987}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDamping: 0.5
-  m_AngularDamping: 3
-  m_GravityScale: 0
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 0
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 0

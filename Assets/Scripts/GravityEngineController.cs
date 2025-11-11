@@ -3,27 +3,33 @@ using UnityEngine;
 
 public class GravityEngineController : MonoBehaviour
 {
-    public static GravityEngineController Instance;
-
     [Header("Gravity Engine Settings")]
-    public float gravityEngineRadius = 3f; //gravity influence radius
-    public LayerMask debrisMask;
+    public float gravityRadius = 3f; //how far gravity engine pulls debris
+    public float gravityStrength = 3f; //how strong the gravity pull is
 
-    [Header("Tracking")]
-    public List<DebrisController> trackedDebris = new List<DebrisController>();
 
-    [Header("Orbit Spacing")]
-    public float orbitRadius = 1.5f;
-    public float orbitRadiusSpacing = 0.3f;
-    //public float spacingLerpSpeed = 2f; //how fast spacing adjusts
+    [Header("Gravity Orbit Settings")]
+    public float orbitRadius = 2f; //how far debris orbits from gravity engine center
+    public float orbitSpacingSmoothness = 5f;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
+    [Header("Gravity Trail Settings")]
+    public float playerSpeedThreshold = 3f; //speed above which debris will trail instead of orbiting
+    public float reenterOrbitDelay = 1f; //how long debris must wait before re-entering orbit
+
+
+    [Header("Debris Tracking List")]
+    public List<DebrisController> trackedDebris = new List<DebrisController>(); //list of all debris currently being tracked by this gravity engine
+    public LayerMask debrisMask; //layer mask for debris objects
+    private Rigidbody2D playerRb; //reference to player rigidbody
+
+
     void Start()
     {
-        Instance = this;
+        //get player rigidbody
+        playerRb = GetComponent<Rigidbody2D>();
     }
 
-    // Update is called once per frame
     void Update()
     {
         
@@ -31,55 +37,84 @@ public class GravityEngineController : MonoBehaviour
 
     void FixedUpdate()
     {
-        //find all debris within radius
-        Collider2D[] debrisInGravityRange = Physics2D.OverlapCircleAll(transform.position, gravityEngineRadius, debrisMask);
-
-        foreach (var gravityDebris in debrisInGravityRange)
-        {
-            DebrisController debris = gravityDebris.GetComponent<DebrisController>();
-            if (!debris)
-                continue;
-
-            //check for new tracked debris
-            if (!trackedDebris.Contains(debris))
-                trackedDebris.Add(debris);
-        }
-
-        // update orbit spacing if more than one debris is captured
-        UpdateOrbitSpacing();
+        //check for new debris to track
+        CheckForDebris();
+        //update all tracked debris
+        UpdateDebrisStates();
+        //update orbit spacing for captured debris
+        UpdateOrbitAngles();
     }
 
-    void UpdateOrbitSpacing()
+    public void CheckForDebris()
     {
-        int count = trackedDebris.Count;
-        for (int i = trackedDebris.Count - 1; i >= 0; i--)
+        //find all debris within gravity engine range
+        Collider2D[] insideGravityRange = Physics2D.OverlapCircleAll(transform.position, gravityRadius, debrisMask);
+
+        //add any new debris to tracking list
+        foreach (var pulledDebris in insideGravityRange)
         {
-            DebrisController debris = trackedDebris[i];
-            if (!debris)
+            DebrisController debris = pulledDebris.GetComponent<DebrisController>();
+            if (debris && !trackedDebris.Contains(debris))
+            {
+                trackedDebris.Add(debris);
+            } 
+        }
+
+        //clean up any debris that have been destroyed
+        for (int i = trackedDebris.Count - 1; i >= 0; i--)
+        { 
+            if (!trackedDebris[i])
             {
                 trackedDebris.RemoveAt(i);
-                continue;
             }
+        }
+    }
 
-            //update capture/decay/pull on every tracked debris
-            debris.UpdateCapture(transform, gravityEngineRadius);
+    public void UpdateDebrisStates()
+    {
+        //get player speed
+        float playerSpeed = 0f;
+        if (playerRb)
+        {
+            playerSpeed = playerRb.linearVelocity.magnitude;
+        }
 
-            if (!debris.isInOrbit)  
-                continue;
+        //update each tracked debris
+        for (int i = 0; i < trackedDebris.Count; i++)
+        {
+            DebrisController debris = trackedDebris[i];
+            if (debris)
+            {
+                //this function handles everything: progress, decay, and restoring velocity
+                debris.UpdateCapture(transform, gravityRadius, gravityStrength, orbitRadius, playerSpeed, playerSpeedThreshold, reenterOrbitDelay, i);
+            }
+        }
+    }
 
-            //evenly distribute captured debris
+    public void UpdateOrbitAngles()
+    {
+        //get all debris currently in orbit
+        List<DebrisController> orbitingDebris = trackedDebris.FindAll(debris => debris && debris.isInOrbit);
+        int count = orbitingDebris.Count;
+        if (count == 0)
+            return;
+
+        //set evenly spaced orbit angles for each debris
+        for (int i = 0; i < count; i++)
+        {
+            //set initial angle for orbiting debris
             float angleOffset = (2 * Mathf.PI / count) * i;
-            debris.orbitAngleOffset = angleOffset;
-
-            //smoothly adjust orbit radius
-            float targetRadius = orbitRadius + i * orbitRadiusSpacing;
-            debris.SetOrbitRadius(targetRadius);
+            orbitingDebris[i].SetInitialAngle(angleOffset);
         }
     }
 
     void OnDrawGizmos()
     {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, gravityEngineRadius);
+        //draw gravity and orbit ranges`
+        Gizmos.color = Color.yellow; //gravity capture zone
+        Gizmos.DrawWireSphere(transform.position, gravityRadius);
+
+        Gizmos.color = Color.green; //orbit zone
+        Gizmos.DrawWireSphere(transform.position, orbitRadius);
     }
 }

@@ -119,30 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &99913096 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5073917542897289987, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
-  m_PrefabInstance: {fileID: 737100340}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &99913103
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 99913096}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 849bdf5b984e283419edb1dd7ba145cf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gravityEngineRadius: 3
-  debrisMask:
-    serializedVersion: 2
-    m_Bits: 64
-  trackedDebris: []
-  orbitRadius: 0.5
-  orbitRadiusSpacing: 0.5
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -225,7 +201,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.41960788, g: 0.41960788, b: 0.41960788, a: 0}
+  m_BackGroundColor: {r: 0.21176471, g: 0.21176471, b: 0.21176471, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -501,9 +477,9 @@ MonoBehaviour:
   - {fileID: 8001523080420548711, guid: d2d9221a2d63d4941b647ee9033946c4, type: 3}
   - {fileID: 7477626189801420638, guid: 417e30e256b0f8447a6c78e0e21a8581, type: 3}
   - {fileID: 2008391577427198326, guid: 14ecf22673df85f44af8eead3f225023, type: 3}
-  spawnInterval: 2
+  spawnInterval: 1
   intitialForce: 150
-  spawnThreshold: 10
+  spawnThreshold: 20
   spawnDistance: 2
   directionSkew: 5
 --- !u!4 &663967173
@@ -638,12 +614,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 109561785298019068, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
       propertyPath: maxVelocity
-      value: 10
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 109561785298019068, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
       propertyPath: screenFlash
       value: 
       objectReference: {fileID: 625205200}
+    - target: {fileID: 109561785298019068, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
+      propertyPath: thrustForce
+      value: 1200
+      objectReference: {fileID: 0}
     - target: {fileID: 109561785298019068, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
       propertyPath: squashAmount
       value: 0.6
@@ -651,6 +631,10 @@ PrefabInstance:
     - target: {fileID: 109561785298019068, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
       propertyPath: rotationPower
       value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 109561785298019068, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
+      propertyPath: rotationSpeed
+      value: 600
       objectReference: {fileID: 0}
     - target: {fileID: 299801913139558650, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
       propertyPath: looping
@@ -1212,6 +1196,18 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 2b3b8656cdf407145956360fe4649148, type: 2}
+    - target: {fileID: 3369900507856224546, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
+      propertyPath: m_Color.b
+      value: 0.882353
+      objectReference: {fileID: 0}
+    - target: {fileID: 3369900507856224546, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
+      propertyPath: m_Color.g
+      value: 0.882353
+      objectReference: {fileID: 0}
+    - target: {fileID: 3369900507856224546, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
+      propertyPath: m_Color.r
+      value: 0.882353
+      objectReference: {fileID: 0}
     - target: {fileID: 4213149413820993017, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
       propertyPath: m_Material
       value: 
@@ -1222,11 +1218,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4213149413820993017, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
       propertyPath: m_LinearDamping
-      value: 0.5
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 4213149413820993017, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
       propertyPath: m_AngularDamping
-      value: 5
+      value: 200
       objectReference: {fileID: 0}
     - target: {fileID: 4213149413820993017, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
       propertyPath: m_CollisionDetection
@@ -1263,10 +1259,7 @@ PrefabInstance:
     - {fileID: 6408495645487686203, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
     - {fileID: 393240580435302861, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 5073917542897289987, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
-      insertIndex: 2
-      addedObject: {fileID: 99913103}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
 --- !u!1 &1537556583
 GameObject:

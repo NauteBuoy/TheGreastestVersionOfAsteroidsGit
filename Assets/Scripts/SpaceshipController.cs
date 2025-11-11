@@ -11,8 +11,8 @@ public class SpaceshipController : MonoBehaviour
     //public float healthCurrent;
 
     [Header("Movement Settings")]
-    public float enginePower = 200f;
-    public float rotationPower = 5f;
+    public float thrustForce = 200f;
+    public float rotationSpeed = 5f;
     public float maxVelocity = 10f;
 
     //[Header("Dash/Roll Settings")]
@@ -145,16 +145,16 @@ public class SpaceshipController : MonoBehaviour
         movementInput.y = Input.GetAxisRaw("Vertical"); //thrust
     }
 
-    private void ApplyThrust(float amount)
+    private void ApplyThrust(float thrust)
     {
-        Vector2 thrust = transform.up * enginePower * Time.fixedDeltaTime * amount;
-        rbShip.AddForce(thrust);
+        Vector2 shipThrust = transform.up * thrust * thrustForce * Time.fixedDeltaTime;
+        rbShip.AddForce(shipThrust, ForceMode2D.Force);
     }
 
-    private void ApplyTorque(float amount)
+    private void ApplyTorque(float rotate)
     {
-        float rotation = amount * Time.fixedDeltaTime * rotationPower;
-        rbShip.AddTorque(-rotation);
+        float shipRotate = rotate * rotationSpeed * Time.fixedDeltaTime;
+        rbShip.AddTorque(-shipRotate);
 
         //rbShip.MoveRotation(rbShip.rotation - rotation);
     }

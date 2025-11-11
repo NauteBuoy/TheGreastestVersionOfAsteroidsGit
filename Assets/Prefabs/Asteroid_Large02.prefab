@@ -51,7 +51,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   healthMax: 3
   collisionDamage: 1
-  asteroidVelocity: 3
+  asteroidVelocity: 2
   asteroidValue: 2
   asteroidChunks:
   - {fileID: 4082472932018963504, guid: b64ef9f378cbcb2408714bdf2d25a51e, type: 3}
@@ -77,17 +77,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fc4e55b480881a4bb4b7edd07332e28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  orbitTarget: {fileID: 0}
+  isInGravityEngineRange: 0
   isInOrbit: 0
-  orbitSpeed: 100
-  orbitSnapDuration: 0.1
-  orbitFollowSpeed: 4
+  isTrailing: 0
+  orbitSpeed: 90
+  orbitFollowSpeed: 24
+  stateTransitionTime: 0.5
+  trailFollowSpeed: 12
+  trailSpreadOffset: 1
+  trailLag: 0.2
   captureProgress: 0
-  captureTime: 3
-  orbitAngleOffset: 0
-  currentOrbitRadius: 0
-  rotationAccumulator: 0
-  pullStrength: 4
+  captureTime: 4
+  captureGravityFactor: 0.95
+  releaseVelocityFactor: 0.5
 --- !u!50 &5582506388458535565
 Rigidbody2D:
   serializedVersion: 5
@@ -101,8 +103,8 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0
+  m_LinearDamping: 0.05
+  m_AngularDamping: 0.5
   m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -160,7 +162,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 7661135311903220022, guid: b23dde01d531cc54894abb2c2e7bf5b7, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.88235295, g: 0.88235295, b: 0.88235295, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
