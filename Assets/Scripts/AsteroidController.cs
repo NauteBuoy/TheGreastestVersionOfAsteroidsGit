@@ -9,8 +9,10 @@ public class AsteroidController : MonoBehaviour
     public float asteroidVelocity = 3f;
     public int asteroidValue = 3;
 
+
     [Header("Asteroid Chunks")]
     public GameObject[] asteroidChunks;
+
 
     [Header("Chunk Explosion Settings")]
     public GameObject explosionFX;
@@ -18,6 +20,11 @@ public class AsteroidController : MonoBehaviour
     public int chunkMax = 5;
     public float chunkDistance = 0.5f;
     public float chunkForce = 10f;
+
+
+    [Header("Highscore Settings")]
+    public int scoreValue = 10;
+
 
     [Header("Private Settings")]
     private Rigidbody2D rbAsteroid;
@@ -45,7 +52,7 @@ public class AsteroidController : MonoBehaviour
         SpaceshipController spaceship = collision.gameObject.gameObject.GetComponent<SpaceshipController>();
         if (spaceship != null)
         {
-            //spaceship.TakeDamage(collisionDamage);
+            spaceship.TakeDamage(collisionDamage);
         }
     }
 
@@ -54,12 +61,18 @@ public class AsteroidController : MonoBehaviour
         healthCurrent = healthCurrent - damage;
         if (healthCurrent <= 0)
         {
-            BreakApart();
+            Explode();
         }
     }
 
-    private void BreakApart()
+    private void Explode()
     {
+        SpaceshipController playerShip = Object.FindAnyObjectByType<SpaceshipController>();
+        if (playerShip)
+        {
+            playerShip.score += scoreValue;
+        }
+
         int numChunks = Random.Range(chunkMin, chunkMax + 1);
 
         if (asteroidChunks != null && asteroidChunks.Length > 0)

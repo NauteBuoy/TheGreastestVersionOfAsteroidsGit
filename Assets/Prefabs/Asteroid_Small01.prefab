@@ -32,7 +32,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -50,9 +50,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   healthMax: 3
-  collisionDamage: 1
+  collisionDamage: 0.1
   asteroidVelocity: 2
-  asteroidValue: 2
+  asteroidValue: 4
   asteroidChunks:
   - {fileID: 0}
   explosionFX: {fileID: 9119991457998186944, guid: 9e80bf40a52fe1c48b50ffc08133d49b, type: 3}
@@ -60,6 +60,7 @@ MonoBehaviour:
   chunkMax: 3
   chunkDistance: 2
   chunkForce: 1
+  scoreValue: 10
 --- !u!114 &5205180368056902900
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -72,19 +73,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fc4e55b480881a4bb4b7edd07332e28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isInGravityEngineRange: 0
+  isInGravityRange: 0
   isInOrbit: 0
   isTrailing: 0
-  orbitSpeed: 90
-  orbitFollowSpeed: 24
+  orbitRotationSpeed: 180
+  orbitFollowSpeed: 12
   stateTransitionTime: 0.5
   trailFollowSpeed: 12
-  trailSpreadOffset: 1
+  trailSpread: 1
   trailLag: 0.2
   captureProgress: 0
-  captureTime: 4
-  captureGravityFactor: 0.95
-  releaseVelocityFactor: 0.5
+  captureTime: 5
+  captureGravityFactor: 0.98
+  releaseVelocityFactor: 1.2
 --- !u!50 &1548874881135153912
 Rigidbody2D:
   serializedVersion: 5
@@ -98,8 +99,8 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 0.3
-  m_LinearDamping: 0.05
-  m_AngularDamping: 0.5
+  m_LinearDamping: 0
+  m_AngularDamping: 20
   m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -157,7 +158,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: -622666220969679413, guid: f6e4588ea0e7f9e4b9abca6d3dd8eb0c, type: 3}
-  m_Color: {r: 0.88235295, g: 0.88235295, b: 0.88235295, a: 1}
+  m_Color: {r: 0.09433961, g: 0.09433961, b: 0.09433961, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

@@ -42,7 +42,7 @@ public class GravityEngineController : MonoBehaviour
         //update all tracked debris
         UpdateDebrisStates();
         //update orbit spacing for captured debris
-        UpdateOrbitAngles();
+        //UpdateOrbitAngles();
     }
 
     public void CheckForDebris()
@@ -91,22 +91,22 @@ public class GravityEngineController : MonoBehaviour
         }
     }
 
-    public void UpdateOrbitAngles()
-    {
-        //get all debris currently in orbit
-        List<DebrisController> orbitingDebris = trackedDebris.FindAll(debris => debris && debris.isInOrbit);
-        int count = orbitingDebris.Count;
-        if (count == 0)
-            return;
+    //public void UpdateOrbitAngles()
+    //{
+    //    //get all debris currently in orbit
+    //    List<DebrisController> orbitingDebris = trackedDebris.FindAll(debris => debris && debris.isInOrbit);
+    //    int count = orbitingDebris.Count;
+    //    if (count == 0)
+    //        return;
 
-        //set evenly spaced orbit angles for each debris
-        for (int i = 0; i < count; i++)
-        {
-            //set initial angle for orbiting debris
-            float angleOffset = (2 * Mathf.PI / count) * i;
-            orbitingDebris[i].SetInitialAngle(angleOffset);
-        }
-    }
+    //    //set evenly spaced orbit angles for each debris
+    //    for (int i = 0; i < count; i++)
+    //    {
+    //        //set initial angle for orbiting debris
+    //        float angleOffset = (2 * Mathf.PI / count) * i;
+    //        orbitingDebris[i].SetInitialAngle(angleOffset);
+    //    }
+    //}
 
     void OnDrawGizmos()
     {

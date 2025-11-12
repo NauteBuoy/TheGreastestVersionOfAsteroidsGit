@@ -1,33 +1,44 @@
-﻿using System.Diagnostics;
+﻿using System.Collections;
+using System.Diagnostics;
 using UnityEditor.Rendering.LookDev;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
+using UnityEngine.UIElements;
 using UnityEngine.VFX;
 using static UnityEngine.RuleTile.TilingRuleOutput;
 
 public class SpaceshipController : MonoBehaviour
 {
-    //[Header("Health Settings")]
-    //public float healthMax = 3f;
-    //public float healthCurrent;
+    [Header("Health Settings")]
+    public float healthMax = 3f;
+    public float healthCurrent;
+
 
     [Header("Movement Settings")]
     public float thrustForce = 200f;
     public float rotationSpeed = 5f;
     public float maxVelocity = 10f;
 
-    //[Header("Dash/Roll Settings")]
+
+    [Header("Dash/Roll Settings")]
     //public float dashForce = 10f;
-    //public float dashCooldown = 1f;
-    //public float dashDuration = 0.15f;
-    //public float squashAmount = 0.5f;    //how much to squash/stretch
-    //public float squashSpeed = 10f;      //how fast it returns to normal
+    public float dashCooldown = 1f;
+    public float dashDuration = 0.15f;
+    public float squashAmount = 0.5f;    //how much to squash/stretch
+    public float squashSpeed = 10f;      //how fast it returns to normal
+
+
+    [Header("Private Settings")]
+    public int score = 0;
+
 
     [Header("Private Settings")]
     private Rigidbody2D rbShip;
     private Vector2 movementInput;
-    //private float lastDashTime = -10f;
-    //private float dashTimer = 0f;
-    //private Vector3 baseScale;
+    private float lastDashTime = -10f;
+    private float dashTimer = 0f;
+    private Vector3 baseScale;
+
 
     //[Header("Bullet Settings")]
     //public GameObject bulletObj;
@@ -36,12 +47,16 @@ public class SpaceshipController : MonoBehaviour
     //public float fireRate = 0.33f;
     //private float fireTimer = 0f;
 
-    //[Header("FX Settings")]
+
+    [Header("FX Settings")]
     //public GameObject EngineFX;
-    //public GameObject explosionFX;
-    //public ScreenFlashController screenFlash;
-    //public CameraShakeController cameraShake;
-    //public float screenShakeMultiplier = 1f;
+    public GameObject explosionFX;
+    public ScreenFlashController screenFlash;
+    public CameraShakeController cameraShake;
+    public float screenShakeMultiplier = 1f;
+
+    public GameOverUIController gameOverUI;
+
 
     private void Awake()
     {
@@ -53,7 +68,7 @@ public class SpaceshipController : MonoBehaviour
     void Start()
     {
         //healthCurrent = healthMax;
-        //baseScale = transform.localScale;
+        baseScale = transform.localScale;
     }
 
     // Update is called once per frame
@@ -61,8 +76,8 @@ public class SpaceshipController : MonoBehaviour
     {
         HandleMovementInput();
 
-        //HandleDashInput();
-        //HandleSquash();
+        HandleDashInput();
+        HandleSquash();
         //UpdateFiring();
     }
     
@@ -76,24 +91,25 @@ public class SpaceshipController : MonoBehaviour
         ClampVelocity();
     }
 
-    //public void TakeDamage(float damage)
-    //{
-    //    healthCurrent = healthCurrent - damage;
+    public void TakeDamage(float damage)
+    {
+        healthCurrent = healthCurrent - damage;
 
-    //    //StartCoroutine(screenFlash.FlashRoutine());
-    //    //StartCoroutine(cameraShake.ShakeRoutine());
+        StartCoroutine(screenFlash.FlashRoutine());
+        cameraShake.StartSceenShake(screenShakeMultiplier);
 
-    //    if (healthCurrent <= 0)
-    //    {
-    //        Explode();
-    //    }
-    //}
+        if (healthCurrent <= 0)
+        {
+            //Explode();
+        }
+    }
 
-    //public void Explode()
-    //{
-    //    Instantiate(explosionFX, transform.position, Quaternion.identity);
-    //    Destroy(gameObject); // remove the spaceship!
-    //}
+    public void Explode()
+    {
+        Instantiate(explosionFX, transform.position, Quaternion.identity);
+        StartCoroutine(GameOverRoutine());
+        Destroy(gameObject); // remove the spaceship!
+    }
 
     //private void UpdateFiring()
     //{
@@ -118,26 +134,27 @@ public class SpaceshipController : MonoBehaviour
     //    Destroy(bullet, 1f);
     //}
 
-    //public void HandleDashInput()
-    //{
-    //    if (Time.time < lastDashTime + dashCooldown) 
-    //        return;
+    public void HandleDashInput()
+    {
+        if (Time.time < lastDashTime + dashCooldown)
+            return;
 
-    //    if (Input.GetKeyDown(KeyCode.Q))
-    //    {
-    //        Dash(-transform.right);     // sidestep left
-    //    }
-    //    else if (Input.GetKeyDown(KeyCode.E))
-    //    {
-    //        Dash(transform.right);      // sidestep right
-    //    }
-    //    else if (Input.GetKeyDown(KeyCode.X))
-    //    {
-    //        QuickTurn();// flip 180
-    //        StartCoroutine(screenFlash.FlashRoutine());
-    //        cameraShake.StartSceenShake(screenShakeMultiplier);
-    //    }
-    //}
+        //    if (Input.GetKeyDown(KeyCode.Q))
+        //    {
+        //        Dash(-transform.right);     // sidestep left
+        //    }
+        //    else if (Input.GetKeyDown(KeyCode.E))
+        //    {
+        //        Dash(transform.right);      // sidestep right
+        //    }
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            QuickTurn();// flip 180
+            //cameraShake.StartSceenShake(screenShakeMultiplier);
+            //StartCoroutine(screenFlash.FlashRoutine()); //stays on after explosion.
+            //Explode();
+        }
+    }
 
     private void HandleMovementInput()
     {
@@ -155,8 +172,6 @@ public class SpaceshipController : MonoBehaviour
     {
         float shipRotate = rotate * rotationSpeed * Time.fixedDeltaTime;
         rbShip.AddTorque(-shipRotate);
-
-        //rbShip.MoveRotation(rbShip.rotation - rotation);
     }
 
     private void ClampVelocity()
@@ -164,6 +179,33 @@ public class SpaceshipController : MonoBehaviour
         if (rbShip.linearVelocity.magnitude > maxVelocity)
             rbShip.linearVelocity = rbShip.linearVelocity.normalized * maxVelocity;
     }
+
+    public int GetHighScore()
+    {
+        return PlayerPrefs.GetInt("HighScore", 0);
+    }
+
+    public void SetHighScore (int highScore)
+    {
+        PlayerPrefs.SetInt("HighScore", highScore);
+    }
+
+    public IEnumerator GameOverRoutine()
+    {
+        bool newHighScore = false;
+        if (score > GetHighScore())
+        {
+            SetHighScore(score);
+            newHighScore = true;
+        }
+
+        gameOverUI.Show(newHighScore);
+
+        float GameOverDuration = 0.5f;
+        yield return new WaitForSeconds(GameOverDuration);
+    }
+
+
 
     //private void Dash(Vector2 direction, bool isSideDash = false)
     //{
@@ -173,33 +215,60 @@ public class SpaceshipController : MonoBehaviour
     //    SquashStretch(direction, true);
     //}
 
-    //private void QuickTurn()
-    //{
-    //    lastDashTime = Time.time;
-    //    dashTimer = dashDuration;
+    private void QuickTurn()
+    {
+        lastDashTime = Time.time;
+        dashTimer = dashDuration;
 
-    //    transform.up = -transform.up;   // Flip instantly 180 degrees around Z
-    //    SquashStretch(-transform.up, false);
-    //}
+        transform.up = -transform.up;   // Flip instantly 180 degrees around Z
+        SquashStretch(-transform.up, false);
+    }
 
-    //private void SquashStretch(Vector2 direction, bool isSideways)
-    //{
-    //    // squash in the direction of movement
-    //    if (isSideways)
-    //    {
-    //        // Sidestep dash: squash perpendicular to movement
-    //        transform.localScale = new Vector3(baseScale.x * (1f - squashAmount), baseScale.y * (1f + squashAmount), baseScale.z);
-    //    }
-    //    else
-    //    {
-    //        // Flip/back dash: squash along forward/backward
-    //        transform.localScale = new Vector3(baseScale.x * (1f + squashAmount), baseScale.y * (1f - squashAmount), baseScale.z);
-    //    }
-    //}
+    private void SquashStretch(Vector2 direction, bool isSideways)
+    {
+        // squash in the direction of movement
+        if (isSideways)
+        {
+            // Sidestep dash: squash perpendicular to movement
+            transform.localScale = new Vector3(baseScale.x * (1f - squashAmount), baseScale.y * (1f + squashAmount), baseScale.z);
+        }
+        else
+        {
+            // Flip/back dash: squash along forward/backward
+            transform.localScale = new Vector3(baseScale.x * (1f + squashAmount), baseScale.y * (1f - squashAmount), baseScale.z);
+        }
+    }
 
-    //private void HandleSquash()
-    //{
-    //    // smoothly return to normal scale
-    //    transform.localScale = Vector3.Lerp(transform.localScale, baseScale, Time.deltaTime * squashSpeed);
-    //}
+    private void HandleSquash()
+    {
+        // smoothly return to normal scale
+        transform.localScale = Vector3.Lerp(transform.localScale, baseScale, Time.deltaTime * squashSpeed);
+    }
+
+
+
+
+
+
+
+    public void Movement()
+    {
+        //INPUTS
+        movementInput.x = Input.GetAxisRaw("Horizontal"); //rotation
+        movementInput.y = Input.GetAxisRaw("Vertical"); //thrust
+
+        //THRUST
+        Vector2 shipThrust = transform.up * movementInput.y * thrustForce * Time.fixedDeltaTime;
+        rbShip.AddForce(shipThrust, ForceMode2D.Force);
+
+        //TORQUE
+        float shipRotate = movementInput.x * rotationSpeed * Time.fixedDeltaTime;
+        rbShip.AddTorque(-shipRotate);
+
+        //CLAMP SHIP VELOCITY
+        if (rbShip.linearVelocity.magnitude > maxVelocity)
+        {
+            rbShip.linearVelocity = rbShip.linearVelocity.normalized * maxVelocity;
+        }
+    }
 }

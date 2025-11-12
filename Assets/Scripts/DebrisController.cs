@@ -58,7 +58,7 @@ public class DebrisController : MonoBehaviour
             return;
 
         //if (isInOrbit && !isTrailing)
-        if (isInOrbit && !isTrailing)
+        if (isInOrbit)
         {
             //orbiting
             Orbit();
@@ -138,7 +138,7 @@ public class DebrisController : MonoBehaviour
         //set debris to kinematic and disable collider trigger
         debrisRB.bodyType = RigidbodyType2D.Kinematic;
         debrisRB.linearVelocity = Vector2.zero;
-        //GetComponent<Collider2D>().isTrigger = true;
+        GetComponent<Collider2D>().isTrigger = true;
 
         //calculate starting angle based on current position
         Vector2 directionToGravityCentre = (transform.position - orbitCentre.position).normalized;
