@@ -5,18 +5,17 @@ public class GravityEngineController : MonoBehaviour
 {
     [Header("Gravity Engine Settings")]
     public float gravityRadius = 3f; //how far gravity engine pulls debris
-    public float gravityStrength = 3f; //how strong the gravity pull is
+    public float gravityStrength = 6f; //how strong the gravity pull is
 
 
     [Header("Gravity Orbit Settings")]
     public float orbitRadius = 2f; //how far debris orbits from gravity engine center
-    public float orbitSpacingSmoothness = 5f;
+    public float orbitspacingLerpSpeed = 1.2f; // how quickly debris align to spacing
 
 
     [Header("Gravity Trail Settings")]
     public float playerSpeedThreshold = 3f; //speed above which debris will trail instead of orbiting
-    public float reenterOrbitDelay = 1f; //how long debris must wait before re-entering orbit
-
+    
 
     [Header("Debris Tracking List")]
     public List<DebrisController> trackedDebris = new List<DebrisController>(); //list of all debris currently being tracked by this gravity engine
@@ -42,7 +41,7 @@ public class GravityEngineController : MonoBehaviour
         //update all tracked debris
         UpdateDebrisStates();
         //update orbit spacing for captured debris
-        //UpdateOrbitAngles();
+        UpdateOrbitAngles();
     }
 
     public void CheckForDebris()
@@ -53,7 +52,7 @@ public class GravityEngineController : MonoBehaviour
         //add any new debris to tracking list
         foreach (var pulledDebris in insideGravityRange)
         {
-            DebrisController debris = pulledDebris.GetComponent<DebrisController>();
+            var debris = pulledDebris.GetComponent<DebrisController>();
             if (debris && !trackedDebris.Contains(debris))
             {
                 trackedDebris.Add(debris);
@@ -82,39 +81,45 @@ public class GravityEngineController : MonoBehaviour
         //update each tracked debris
         for (int i = 0; i < trackedDebris.Count; i++)
         {
-            DebrisController debris = trackedDebris[i];
+            var debris = trackedDebris[i];
             if (debris)
             {
                 //this function handles everything: progress, decay, and restoring velocity
-                debris.UpdateCapture(transform, gravityRadius, gravityStrength, orbitRadius, playerSpeed, playerSpeedThreshold, reenterOrbitDelay, i);
+                debris.UpdateCapture(transform, gravityRadius, gravityStrength, orbitRadius, playerSpeed, playerSpeedThreshold, i);
             }
         }
     }
 
-    //public void UpdateOrbitAngles()
-    //{
-    //    //get all debris currently in orbit
-    //    List<DebrisController> orbitingDebris = trackedDebris.FindAll(debris => debris && debris.isInOrbit);
-    //    int count = orbitingDebris.Count;
-    //    if (count == 0)
-    //        return;
+    public void UpdateOrbitAngles()
+    {
+        //get all debris currently in orbit
+        var orbitingDebris = trackedDebris.FindAll(debris => debris && debris.isInOrbit);
+        int count = orbitingDebris.Count;
+        if (count == 0)
+            return;
 
-    //    //set evenly spaced orbit angles for each debris
-    //    for (int i = 0; i < count; i++)
-    //    {
-    //        //set initial angle for orbiting debris
-    //        float angleOffset = (2 * Mathf.PI / count) * i;
-    //        orbitingDebris[i].SetInitialAngle(angleOffset);
-    //    }
-    //}
+        float angleOffset = 2f * Mathf.PI / count;
+
+        //set evenly spaced orbit angles for each debris
+        for (int i = 0; i < count; i++)
+        {
+            DebrisController debris = orbitingDebris[i];
+            if (debris.currentState == DebrisController.State.Orbiting)
+            {
+                //set initial angle for orbiting debris
+                float targetOrbitAngle = angleOffset * i;
+                debris.SetInitialAngle(targetOrbitAngle);
+            }
+        }
+    }
 
     void OnDrawGizmos()
     {
         //draw gravity and orbit ranges`
-        Gizmos.color = Color.yellow; //gravity capture zone
+        Gizmos.color = Color.white; //gravity capture zone
         Gizmos.DrawWireSphere(transform.position, gravityRadius);
 
-        Gizmos.color = Color.green; //orbit zone
+        Gizmos.color = Color.cyan; //orbit zone
         Gizmos.DrawWireSphere(transform.position, orbitRadius);
     }
 }

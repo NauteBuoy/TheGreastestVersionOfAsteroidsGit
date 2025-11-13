@@ -3,31 +3,36 @@ using UnityEngine;
 public class AsteroidController : MonoBehaviour
 {
     [Header("Asteroid Settings")]
-    public float healthMax = 5f;
-    private float healthCurrent;
-    public float collisionDamage = 1f;
-    public float asteroidVelocity = 3f;
-    public int asteroidValue = 3;
+    public float asteroidVelocity = 3f; //initial velocity of asteroid
 
+    [Header("Asteroid Health Settings")]
+    public float healthMax = 5f; //maximum health of asteroid
+    private float healthCurrent; //current health of asteroid
 
-    [Header("Asteroid Chunks")]
-    public GameObject[] asteroidChunks;
+    [Header("Asteroid Damage Settings")]
+    public float collisionDamage = 1f; //damage dealt to player ship on collision
 
+    [Header("Asteroid Spawn Settings")]
+    public int asteroidValue = 3; //value of asteroid for spawning purposes
+
+    [Header("Asteroid Chunk Settings")]
+    public GameObject[] asteroidChunks; //array of asteroid chunk prefabs
 
     [Header("Chunk Explosion Settings")]
-    public GameObject explosionFX;
-    public int chunkMin = 0;
-    public int chunkMax = 5;
-    public float chunkDistance = 0.5f;
-    public float chunkForce = 10f;
-
+    public GameObject explosionFX; //explosion effect prefab
+    public int chunkMin = 0; //minimum number of chunks to spawn
+    public int chunkMax = 5; //maximum number of chunks to spawn
+    public float explosionDistance = 0.5f; //maximum distance chunks can spawn from asteroid center
+    public float explosionForce = 10f; //force applied to chunks on spawn
 
     [Header("Highscore Settings")]
-    public int scoreValue = 10;
-
+    public int scoreValue = 10; //score value awarded to player on asteroid destruction
 
     [Header("Private Settings")]
-    private Rigidbody2D rbAsteroid;
+    private Rigidbody2D rbAsteroid; //reference to asteroid rigidbody
+    private float asteroidRotationSpeed; //rotation speed of asteroid
+    private SpaceshipController playerShip; //reference to player ship
+
 
     private void Awake()
     {
@@ -35,42 +40,41 @@ public class AsteroidController : MonoBehaviour
         rbAsteroid = GetComponent<Rigidbody2D>();
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        rbAsteroid.AddForce(new Vector2(Random.Range(-asteroidVelocity, asteroidVelocity), Random.Range(-asteroidVelocity, asteroidVelocity)), ForceMode2D.Impulse);
+        rbAsteroid.AddForce(Random.insideUnitCircle * asteroidVelocity, ForceMode2D.Impulse); //random initial force
+        asteroidRotationSpeed = Random.Range(-asteroidVelocity, asteroidVelocity); //random rotation speed
+        playerShip = FindAnyObjectByType<SpaceshipController>(); //find player ship in scene
     }
 
-    // Update is called once per frame
     void Update()
     {
-        transform.Rotate(new Vector3(0, 0, Random.Range(-asteroidVelocity, asteroidVelocity)) * Time.deltaTime, Space.World);
+        transform.Rotate(Vector3.forward * asteroidRotationSpeed * Time.deltaTime); //rotate asteroid
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        SpaceshipController spaceship = collision.gameObject.gameObject.GetComponent<SpaceshipController>();
-        if (spaceship != null)
+        playerShip = collision.gameObject.gameObject.GetComponent<SpaceshipController>(); //check if player ship collided
+        if (playerShip != null)
         {
-            spaceship.TakeDamage(collisionDamage);
+            playerShip.TakeDamage(collisionDamage); //damage player ship
         }
     }
 
     public void TakeDamage(float damage)
     {
-        healthCurrent = healthCurrent - damage;
+        healthCurrent -= damage; //reduce health
         if (healthCurrent <= 0)
         {
-            Explode();
+            Explode(); //explode asteroid
         }
     }
 
     private void Explode()
     {
-        SpaceshipController playerShip = Object.FindAnyObjectByType<SpaceshipController>();
         if (playerShip)
         {
-            playerShip.score += scoreValue;
+            playerShip.score += scoreValue; //increase player score
         }
 
         int numChunks = Random.Range(chunkMin, chunkMax + 1);
@@ -79,28 +83,36 @@ public class AsteroidController : MonoBehaviour
         {
             for (int i = 0; i < numChunks; i++)
             {
-                CreateAsteroidChunk();
+                CreateAsteroidChunk(); //create asteroid chunks
             }
-        }  
+        }
 
-        Instantiate(explosionFX, transform.position, transform.rotation);
-        Destroy(gameObject);
+        if (explosionFX)
+        {
+            Instantiate(explosionFX, transform.position, transform.rotation); //create explosion effect
+        }
+
+        Destroy(gameObject); //destroy asteroid
     }
 
     private void CreateAsteroidChunk()
     {
-        int randomIndex = Random.Range(0, asteroidChunks.Length);
+        //get random chunk prefab
+        int randomIndex = Random.Range(0, asteroidChunks.Length); 
         GameObject asteroidChunk = asteroidChunks[randomIndex];
 
+        //randomize spawn position
         Vector2 spawnPos = transform.position;
-        spawnPos.x += Random.Range(-chunkDistance, chunkDistance);
-        spawnPos.y += Random.Range(-chunkDistance, chunkDistance);
+        spawnPos.x += Random.Range(-explosionDistance, explosionDistance); 
+        spawnPos.y += Random.Range(-explosionDistance, explosionDistance);
 
-        GameObject chunk = Instantiate(asteroidChunk, spawnPos, transform.rotation);
+        GameObject chunk = Instantiate(asteroidChunk, spawnPos, transform.rotation); //instantiate chunk
 
-        Vector2 dir = (spawnPos - (Vector2)transform.position).normalized;
-
-        Rigidbody2D rbChuck = chunk.GetComponent<Rigidbody2D>();
-        rbChuck.AddForce(dir * chunkForce);
+        Vector2 randomDirection = Random.insideUnitCircle.normalized; //random direction for explosion force
+        Rigidbody2D chunckRB = chunk.GetComponent<Rigidbody2D>(); //get chunk rigidbody
+        if (chunckRB)
+        {
+            chunckRB.AddForce(randomDirection * Random.Range(explosionForce * 0.5f, explosionForce), ForceMode2D.Impulse); //apply explosion force
+        }
     }
 }

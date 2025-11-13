@@ -6,6 +6,8 @@ public class ScreenWrapController : MonoBehaviour
     private Camera cam;
     private float camHeight;
     private float camWidth;
+    float wrapMargin = 0.5f;
+
 
     void Start()
     {
@@ -18,11 +20,23 @@ public class ScreenWrapController : MonoBehaviour
     {
         Vector3 pos = transform.position;
 
-        if (pos.x > camWidth) pos.x = -camWidth;
-        else if (pos.x < -camWidth) pos.x = camWidth;
+        if (pos.x > camWidth + wrapMargin)
+        {
+            pos.x = -camWidth - wrapMargin;
+        }
+        else if (pos.x < -camWidth - wrapMargin)
+        {
+            pos.x = camWidth + wrapMargin;
+        }
 
-        if (pos.y > camHeight) pos.y = -camHeight;
-        else if (pos.y < -camHeight) pos.y = camHeight;
+        if (pos.y > camHeight + wrapMargin)
+        {
+            pos.y = -camHeight - wrapMargin;
+        }
+        else if (pos.y < -camHeight - wrapMargin)
+        {
+            pos.y = camHeight + wrapMargin;
+        }
 
         transform.position = pos;
     }

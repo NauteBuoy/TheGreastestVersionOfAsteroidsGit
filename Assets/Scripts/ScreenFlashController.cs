@@ -10,35 +10,41 @@ public class ScreenFlashController : MonoBehaviour
 
     public SpaceshipController spaceship;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
     void Start()
     {
         flashImage = GetComponent<Image>();
         flashColor = flashImage.color;
     }
-    public IEnumerator FlashRoutine()
-    { 
-        float timer = 0f;
-        float t = 0f;
-        float alphaFrom = 1f; // fully opaque
-        float alphaTo = 0f; // fully transparent
 
-        while (t < 1f ) // repeats while condition is true
-        {
-            timer += Time.deltaTime;
-            t = Mathf.Clamp01(timer / flashDuration);
-            float alpha = Mathf.Lerp(alphaFrom, alphaTo, t);
-            Color col = flashColor;
-            col.a = alpha;
-            flashImage.color = col;
-            yield return new WaitForEndOfFrame();
-        }
-
-    }
-
-    // Update is called once per frame
     void Update()
     {
         
+    }
+
+    public IEnumerator FlashRoutine()
+    {
+
+        float elapsedTime = 0f;
+        float flashtimer = 0f;
+
+        while (elapsedTime < flashDuration) // repeats while condition is true
+        {
+            elapsedTime += Time.deltaTime;
+            flashtimer = Mathf.Clamp01(elapsedTime / flashDuration);
+            float alpha = Mathf.Lerp(0.8f, 0f, flashtimer);
+            Color col = flashColor;
+            col.a = alpha;
+            flashImage.color = col;
+            yield return null;
+        }
+    }
+
+    public void HideFlash()
+    {
+        Color col = flashColor;
+        col.a = 0f;
+        flashImage.color = col;
+        StopAllCoroutines(); // stop any ongoing flash
     }
 }

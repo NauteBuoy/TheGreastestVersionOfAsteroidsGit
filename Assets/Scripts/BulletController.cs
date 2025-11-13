@@ -5,13 +5,12 @@ public class BulletController : MonoBehaviour
     public float Damage = 1f;
     public GameObject explosionFX;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
     void Start()
     {
 
     }
 
-    // Update is called once per frame
     void Update()
     {
 
@@ -22,7 +21,6 @@ public class BulletController : MonoBehaviour
         AsteroidController asteroid = collision.gameObject.GetComponent<AsteroidController>();
         if (asteroid)
         {
-            Instantiate(explosionFX, transform.position, Quaternion.identity);
             asteroid.TakeDamage(Damage);
             Explode();
         }
@@ -32,6 +30,4 @@ public class BulletController : MonoBehaviour
         Instantiate(explosionFX, transform.position, Quaternion.identity);
         Destroy(gameObject);
     }
-
-
 }

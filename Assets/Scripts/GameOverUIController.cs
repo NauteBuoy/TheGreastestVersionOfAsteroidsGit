@@ -9,13 +9,14 @@ public class GameOverUIController : MonoBehaviour
     public TMP_Text highScoreTextBox;
     public GameObject gameOverPanel;
     public GameObject NewHighScore;
+
     private SpaceshipController playerShip;
 
 
     void Start()
     {
         playerShip = Object.FindAnyObjectByType<SpaceshipController>();
-        Hide(); // hide immediately
+        Hide();
     }
 
     public void Show(bool newHighScore)
@@ -34,7 +35,7 @@ public class GameOverUIController : MonoBehaviour
 
     public void ClickPlayAgain()
     {
-        SceneManager.LoadScene("GameScene"); 
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name); 
     }
     public void ClickMainMenu()
     {

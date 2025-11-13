@@ -8,20 +8,42 @@ public class CameraShakeController : MonoBehaviour
     public float shakeDistance = 0.3f;
     public float shakeDuration = 0.2f;
 
+
+    [Header("Camera Target Settings")]
+    [SerializeField] private GameObject playerTarget;
+    [SerializeField] private float cameraSmoothing = 0.5f;
+    [SerializeField] private Vector3 cameraOffset;
+
+
+    [Header("Camera Bounds Settings")]
+    public Vector2 maxBoundary;
+    public Vector2 minBoundary;
+
+
     [Header("Private Settings")]
-    private Vector3 originalPos;
     private Coroutine shakeRoutine;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
     void Start()
     {
-        originalPos = transform.localPosition;
+
     }
 
-    // Update is called once per frame
     void Update()
     {
 
+    }
+
+    void FixedUpdate()
+    {
+        if (!playerTarget)
+            return;
+
+        Vector3 targetPosition = playerTarget.transform.position + cameraOffset;
+        targetPosition.x = Mathf.Clamp(targetPosition.x, minBoundary.x, maxBoundary.x);
+        targetPosition.y = Mathf.Clamp(targetPosition.y, minBoundary.y, maxBoundary.y);
+
+        transform.position = Vector3.Lerp(transform.position, targetPosition, cameraSmoothing);
     }
 
     public void StartSceenShake(float shakeMultiplier)
@@ -34,20 +56,19 @@ public class CameraShakeController : MonoBehaviour
 
     private IEnumerator ShakeRoutine(float shakeMultiplier)
     {
-        float timeElapsed = 0f;
+        Vector3 startPos = transform.position;
 
+        float timeElapsed = 0f;
         while (timeElapsed < shakeDuration)
         {
             timeElapsed += Time.deltaTime;
-            float shakePercent = timeElapsed / shakeDuration;
-            float currentShakeIntensity = shakeDistance * shakeMultiplier * (1f - shakePercent);
-
-            Vector3 shakePos = Random.insideUnitCircle * currentShakeIntensity;
-            transform.localPosition = originalPos + new Vector3(shakePos.x, shakePos.y, 0);
+            float shakeIntensity = shakeDistance * shakeMultiplier * (1f - timeElapsed / shakeDuration);
+            Vector2 shakeOffset = Random.insideUnitCircle * shakeIntensity;
+            transform.position = startPos + new Vector3(shakeOffset.x, shakeOffset.y, 0);
             yield return null;
         }
 
-        transform.localPosition = originalPos;
+        transform.position = startPos;
         shakeRoutine = null;
     }
 }

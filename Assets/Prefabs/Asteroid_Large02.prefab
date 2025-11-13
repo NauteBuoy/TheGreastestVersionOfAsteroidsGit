@@ -49,10 +49,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 799fbcc7b914ad1468a539aacedd5377, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  asteroidVelocity: 3
   healthMax: 3
-  collisionDamage: 0.1
-  asteroidVelocity: 2
-  asteroidValue: 4
+  collisionDamage: 1
+  asteroidValue: 5
   asteroidChunks:
   - {fileID: 4082472932018963504, guid: b64ef9f378cbcb2408714bdf2d25a51e, type: 3}
   - {fileID: 2428923140451405553, guid: a3e4db3c4b9ce584e89580314747a0c1, type: 3}
@@ -63,8 +63,8 @@ MonoBehaviour:
   explosionFX: {fileID: 9119991457998186944, guid: 9e80bf40a52fe1c48b50ffc08133d49b, type: 3}
   chunkMin: 0
   chunkMax: 3
-  chunkDistance: 2
-  chunkForce: 1
+  explosionDistance: 0.5
+  explosionForce: 10
   scoreValue: 10
 --- !u!114 &-8577485739128696683
 MonoBehaviour:
@@ -73,24 +73,25 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7477626189801420638}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5fc4e55b480881a4bb4b7edd07332e28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentState: 0
   isInGravityRange: 0
-  isInOrbit: 0
-  isTrailing: 0
-  orbitRotationSpeed: 180
+  isCapturing: 0
+  isTransitioning: 0
+  orbitRotationSpeed: 60
   orbitFollowSpeed: 12
-  stateTransitionTime: 0.5
+  stateTransitionDuration: 0.6
   trailFollowSpeed: 12
-  trailSpread: 1
-  trailLag: 0.2
+  trailSpread: 0.6
+  trailLag: 0.6
   captureProgress: 0
-  captureTime: 5
+  captureDuration: 3
   captureGravityFactor: 0.98
-  releaseVelocityFactor: 1.2
+  releaseVelocityFactor: 1.02
 --- !u!50 &5582506388458535565
 Rigidbody2D:
   serializedVersion: 5
@@ -105,7 +106,7 @@ Rigidbody2D:
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDamping: 0
-  m_AngularDamping: 20
+  m_AngularDamping: 0
   m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:

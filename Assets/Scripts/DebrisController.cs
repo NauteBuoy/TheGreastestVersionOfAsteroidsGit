@@ -2,32 +2,40 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 public class DebrisController : MonoBehaviour
 {
+    public enum State {Free, Pulling, Orbiting, Trailing } //possible states of debris
+
     [Header("State Settings")]
-    public bool isInGravityRange = false; //is debris within gravity engine range
-    public bool isInOrbit = false; //is debris currently orbiting
-    public bool isTrailing = false; //is debris currently trailing
+    [SerializeField] public State currentState = State.Free; //current state of debris
+    [SerializeField] private bool isInGravityRange = false; //is debris within gravity engine range
+    [SerializeField] private  bool isCapturing = false; //is debris being captured
+    [SerializeField] private bool isTransitioning = false; //is debris transitioning between states
+
+    public bool isInOrbit => currentState == State.Orbiting; //is debris currently orbiting
+    public bool isTrailing => currentState == State.Trailing; //is debris currently trailing
 
 
     [Header("Orbit Settings")]
     public float orbitRotationSpeed = 180f; //speed of orbit in degrees per second
-    public float orbitFollowSpeed = 4f; //speed at which debris follows orbit position
-    public float stateTransitionTime = 1f; //time to transition between orbit and trail states
+    public float orbitFollowSpeed = 8f; //speed at which debris follows orbit position
+    public float stateTransitionDuration = 1f; //time to transition between orbit and trail states
 
 
     [Header("Trail Settings")]
-    public float trailFollowSpeed = 4f; //speed at which debris follows trail position
-    public float trailSpread = 1f; //spread of debris when trailing
-    public float trailLag = 0.2f; // delay between each debris' response
+    public float trailFollowSpeed = 6f; //speed at which debris follows trail position
+
+        public float trailSpread = 0.6f; //spread of debris when trailing
+        public float trailLag = 0.2f; // delay between each debris' response
 
 
     [Header("Capture Settings")]
-    public float captureProgress = 0f; //progress towards being captured into orbit
-    public float captureTime = 2f; //time required to be captured into orbit
-    public float captureGravityFactor = 0.95f; //factor to reduce velocity while being captured
-    public float releaseVelocityFactor = 1.05f; //factor to increase velocity when released from gravity engine
+    [SerializeField] private float captureProgress = 0f; //progress towards being captured into orbit
+    public float captureDuration = 3f; //time required to be captured into orbit
+    public float captureGravityFactor = 0.98f; //factor to reduce velocity while being captured
+    public float releaseVelocityFactor = 1.02f; //factor to increase velocity when released from gravity engine
 
 
     [Header("Private Settings")]
@@ -57,20 +65,24 @@ public class DebrisController : MonoBehaviour
         if (!orbitCentre)
             return;
 
-        //if (isInOrbit && !isTrailing)
-        if (isInOrbit)
+        switch (currentState)
         {
-            //orbiting
-            Orbit();
-        }
-        else if (isTrailing && !isInOrbit)
-        {
-            //trailing
-            Trail();
+            case State.Orbiting:
+                Orbit();
+                break;
+            case State.Trailing:
+                Trail();
+                break;
+            case State.Pulling:
+                //handled in UpdateCapture
+                break;
+            case State.Free:
+                //free drift, physics handled by Rigidbody2D
+                break;
         }
     }
 
-    public void UpdateCapture(Transform gravityEngineTransfrom, float gravityEngineRadius, float gravityEngineStrength, float gravityEngineOrbitRadius, float playerSpeed, float playerSpeedThreshold, float reentryDelay, int capturedDebrisIndex)
+    public void UpdateCapture(Transform gravityEngineTransfrom, float gravityEngineRadius, float gravityEngineStrength, float gravityEngineOrbitRadius, float playerSpeed, float playerSpeedThreshold, int capturedDebrisIndex)
     {
         //set orbit parameters
         orbitCentre = gravityEngineTransfrom;
@@ -82,36 +94,38 @@ public class DebrisController : MonoBehaviour
         isInGravityRange = distanceFromGravityCentre < gravityEngineRadius;
 
         //manage orbit and trail state transitions
-        UpdateOrbitTrailState(playerSpeed, playerSpeedThreshold, reentryDelay);
+        UpdateOrbitTrailState(playerSpeed, playerSpeedThreshold);
 
         //don't process capture while orbiting
-        if (isInOrbit)
+        if (currentState == State.Orbiting)
             return;
         //don't process capture while trailing
-        if (isTrailing)
+        if (currentState == State.Trailing)
             return;
 
         //check if within gravity engine range
         if (isInGravityRange)
         {
             //store initial velocity on first frame of capture
-            if (captureProgress == 0f)
+            if (!isCapturing)
             {
                 initialVelocity = debrisRB.linearVelocity;
+                isCapturing = true;
+                currentState = State.Pulling;
             }
 
             //increase capture progress over time
-            captureProgress += Time.deltaTime;
-            captureProgress = Mathf.Clamp(captureProgress, 0f, captureTime);
+            captureProgress += Time.fixedDeltaTime;
+            captureProgress = Mathf.Clamp(captureProgress, 0f, captureDuration);
 
             //apply gravitational pull towards gravity engine center
-            float gravityOverTime = Mathf.Lerp(1f, captureGravityFactor, captureProgress / captureTime);
+            float gravityScale = Mathf.Lerp(1f, captureGravityFactor, captureProgress / captureDuration);
             Vector2 directionToGravityCenter = (orbitCentre.position - transform.position).normalized;
             debrisRB.AddForce(directionToGravityCenter * gravityEngineStrength, ForceMode2D.Force);
-            debrisRB.linearVelocity *= gravityOverTime;
+            debrisRB.linearVelocity *= gravityScale;
 
             //check if capture is complete
-            if (captureProgress >= captureTime)
+            if (captureProgress >= captureDuration && !isTransitioning)
             {
                 //capture debris into orbit
                 StartCoroutine(CaptureIntoOrbitRoutine());
@@ -121,22 +135,139 @@ public class DebrisController : MonoBehaviour
         else
         {
             //decrease capture progress over time
-            captureProgress = Mathf.Max(0f, captureProgress - Time.deltaTime * 0.5f);
+            captureProgress = Mathf.Max(0f, captureProgress - Time.fixedDeltaTime * 0.5f);
 
             //restore initial velocity
             Vector2 releaseVelocity = initialVelocity * releaseVelocityFactor;
-            debrisRB.linearVelocity = Vector2.Lerp(debrisRB.linearVelocity, releaseVelocity, Time.deltaTime * 2f);
+            debrisRB.linearVelocity = Vector2.Lerp(debrisRB.linearVelocity, releaseVelocity, Time.fixedDeltaTime * 2f);
+
+            if (captureProgress <= 0f)
+            {
+                isCapturing = false;
+                currentState = State.Free;
+            }
         }
+    }
+
+    void UpdateOrbitTrailState(float playerSpeed, float playerSpeedThreshold)
+    {
+        if (isTransitioning)
+            return;
+
+        //update time since trailing
+        if (currentState == State.Trailing)
+        {
+            timeSinceTrail += Time.fixedDeltaTime;
+        }
+        else
+        {
+            timeSinceTrail = 0f; //reset timer if not trailing
+        }
+
+        if (currentState == State.Orbiting && playerSpeed >= playerSpeedThreshold)
+        {
+            //switch to trail state
+            StartCoroutine(SwitchToTrailRoutine());
+        }
+        else if (currentState == State.Trailing && playerSpeed < playerSpeedThreshold)
+        {
+            //switch to orbit state
+            StartCoroutine(SwitchToOrbitRoutine());
+        }
+    }
+
+    private IEnumerator SwitchToTrailRoutine()
+    {
+        //check if already trailing 
+        if (isTrailing)
+            yield break;
+
+        isTransitioning = true;
+
+        currentState = State.Trailing;
+
+        //move debris to exact trailing position over transition time
+        Vector2 startOrbitPos = transform.position;
+        Vector2 trailDirection = Vector2.zero;
+
+        Rigidbody2D playerRB = orbitCentre.GetComponent<Rigidbody2D>();
+
+
+        if (orbitCentre)
+        {
+            Vector2 playerVelocity = playerRB.linearVelocity;
+            if (playerVelocity.magnitude > 0.1f)
+            {
+                trailDirection = playerVelocity.normalized;
+            }
+            else
+            {
+                trailDirection = -orbitCentre.up;
+            }
+        }
+
+        Vector2 spreadOffset = Vector2.Perpendicular(trailDirection).normalized * (debrisIndex * trailSpread);
+        Vector2 endTrailPos = (Vector2)orbitCentre.position - trailDirection * (2f + debrisIndex * 0.3f) + spreadOffset;
+
+        float timeElapsed = 0f;
+        while (timeElapsed < stateTransitionDuration)
+        {
+            //lerp to trail position
+            timeElapsed += Time.fixedDeltaTime;
+            float smoothDutration = Mathf.SmoothStep(0f, 1f, timeElapsed / stateTransitionDuration);
+            transform.position = Vector2.Lerp(startOrbitPos, endTrailPos, smoothDutration);
+            yield return new WaitForFixedUpdate();
+        }
+
+        debrisRB.MovePosition(endTrailPos);
+        isTransitioning = false;
+        yield break;
+    }
+
+    private IEnumerator SwitchToOrbitRoutine()
+    {
+        //check if already orbiting
+        if (isTransitioning)
+            yield break;
+
+        isTransitioning = true;
+
+        //move debris to exact orbit position over transition time
+        Vector2 startTrailPos = transform.position;
+        Vector2 orbitOffset = new Vector2(Mathf.Cos(currentAngle), Mathf.Sin(currentAngle)) * orbitRadius;
+        Vector2 targetOrbitPos = (Vector2)orbitCentre.position + orbitOffset;
+
+        float timeElapsed = 0f;
+        while (timeElapsed < stateTransitionDuration)
+        {
+            //lerp to orbit position
+            timeElapsed += Time.fixedDeltaTime;
+            float smoothTransitonDutration = Mathf.SmoothStep(0f, 1f, timeElapsed / stateTransitionDuration);
+
+            debrisRB.MovePosition(transform.position = Vector2.Lerp(startTrailPos, targetOrbitPos, smoothTransitonDutration));
+
+            yield return new WaitForFixedUpdate();
+        }
+
+        transform.position = targetOrbitPos;
+
+        currentState = State.Orbiting;
+        timeSinceTrail = 0f;
+        isTransitioning = false;
+        yield break;
     }
 
     private IEnumerator CaptureIntoOrbitRoutine()
     {
         //set state to orbiting
-        isInOrbit = true;
-        isTrailing = false;
+        if (isTransitioning) 
+            yield break;
 
-        //set debris to kinematic and disable collider trigger
-        debrisRB.bodyType = RigidbodyType2D.Kinematic;
+        isTransitioning = true;
+        isCapturing = false;
+        currentState = State.Orbiting;
+
+        //disable collider trigger
         debrisRB.linearVelocity = Vector2.zero;
         GetComponent<Collider2D>().isTrigger = true;
 
@@ -149,180 +280,68 @@ public class DebrisController : MonoBehaviour
         Vector2 endOrbitPos = (Vector2)orbitCentre.position + directionToGravityCentre * orbitRadius;
 
         float timeElapsed = 0f;
-        //float captureDuration = Mathf.Max(0.01f, captureTime);
-        while (timeElapsed < stateTransitionTime)
+        while (timeElapsed < captureDuration)
         {
             //lerp to orbit position
-            timeElapsed += Time.deltaTime;
-            transform.position = Vector2.Lerp(startCapturedPos, endOrbitPos, timeElapsed / stateTransitionTime);
+            timeElapsed += Time.fixedDeltaTime;
+            float smoothDuration = Mathf.SmoothStep(0f, 1f, timeElapsed / captureDuration);
+            transform.position = Vector2.Lerp(startCapturedPos, endOrbitPos, smoothDuration);
             yield return null;
         }
 
         //ensure exact orbit position
         transform.position = endOrbitPos;
-    }
-
-    void UpdateOrbitTrailState(float playerSpeed, float playerSpeedThreshold, float reentryDelay)
-    {
-        //update time since trailing
-        timeSinceTrail += Time.deltaTime;
-
-        if (isInOrbit && playerSpeed > playerSpeedThreshold)
-        {
-            //switch to trail state
-            StartCoroutine(SwitchToTrail());
-        }
-        else if (isTrailing && playerSpeed <= playerSpeedThreshold)// && timeSinceTrail >= reentryDelay)
-        {
-            //switch to orbit state
-            StartCoroutine(SwitchToOrbit());
-        }
-        else
-        {
-            timeSinceTrail = 0f;
-        }
-    }
-
-    private IEnumerator SwitchToTrail()
-    {
-        //check if already trailing
-        if (isTrailing)
-            yield break;
-
-        //set state to trailing
-        isInOrbit = false;
-        isTrailing = true;
-
-        //move debris to exact trailing position over transition time
-        Vector2 startOrbitPos = transform.position;
-        Vector2 trailDirection = Vector2.zero;
-
-        if (orbitCentre.TryGetComponent(out Rigidbody2D orbitRb))
-        {
-            Vector2 velocity = orbitRb.linearVelocity;
-            if (velocity.magnitude > 0.1f)
-            {
-                trailDirection = velocity.normalized;
-            }
-            else
-            {
-                trailDirection = -orbitCentre.up;
-            }
-        }
-
-        Vector2 spreadOffset = Vector2.Perpendicular(trailDirection).normalized * (debrisIndex * trailSpread);
-        Vector2 endTrailPos = (Vector2)orbitCentre.position - trailDirection * (2f + debrisIndex * 0.3f) + spreadOffset;
-
-        float timeElapsed = 0f;
-        while (timeElapsed < stateTransitionTime)
-        {
-            //lerp to trail position
-            timeElapsed += Time.deltaTime;
-            transform.position = Vector2.Lerp(startOrbitPos, endTrailPos, timeElapsed / stateTransitionTime);
-            yield return null;
-        }
-
-        transform.position = endTrailPos;
-    }
-
-    private IEnumerator SwitchToOrbit()
-    {
-        //check if already orbiting
-        if (isInOrbit)
-            yield break;
-
-        //set state to orbiting
-        isInOrbit = true;
-        isTrailing = false;
-
-        //move debris to exact orbit position over transition time
-        Vector2 startTrailPos = transform.position;
-        Vector2 orbitOffset = new Vector2(Mathf.Cos(currentAngle), Mathf.Sin(currentAngle)) * orbitRadius;
-        Vector2 targetOrbitPos = (Vector2)orbitCentre.position + orbitOffset;
-
-        float timeElapsed = 0f;
-        while (timeElapsed < stateTransitionTime)
-        {
-            //lerp to orbit position
-            timeElapsed += Time.deltaTime;
-            transform.position = Vector2.Lerp(startTrailPos, targetOrbitPos, timeElapsed / stateTransitionTime);
-            yield return null;
-        }
-
-        transform.position = targetOrbitPos;
-        timeSinceTrail = 0f;
+        captureProgress = 0f;
+        isTransitioning = false;
+        yield break;
     }
 
     private void Orbit()
     {
         //update current angle based on orbit speed
         currentAngle += orbitRotationSpeed * Mathf.Deg2Rad * Time.fixedDeltaTime;
+
         Vector2 orbitOffset = new Vector2(Mathf.Cos(currentAngle), Mathf.Sin(currentAngle)) * orbitRadius;
         Vector2 targetOrbitPos = (Vector2)orbitCentre.position + orbitOffset;
 
-        transform.position = Vector2.Lerp(transform.position, targetOrbitPos, Time.fixedDeltaTime * orbitFollowSpeed);
+        Vector2 targetOrbitRotationPos = Vector2.Lerp(transform.position, targetOrbitPos, Mathf.Clamp01(Time.fixedDeltaTime * orbitFollowSpeed));
+        debrisRB.MovePosition(targetOrbitRotationPos);
     }
 
     private void Trail()
     {
-        if (!orbitCentre)
-            return;
 
-        Rigidbody2D orbitRb = orbitCentre.GetComponent<Rigidbody2D>();
-        if (!orbitRb)
-            return;
-
-        // Get movement direction based on velocity, not facing direction
-        Vector2 velocity = orbitRb.linearVelocity;
-
-        // If velocity is near zero, fallback to facing direction
-        Vector2 trailDirection;
-        if (velocity.magnitude > 0.1f)
-        {
-            trailDirection = velocity.normalized;
-        }
-        else
-        {
-            trailDirection = -orbitCentre.up;
-        }
-
-        // Position debris behind player, relative to movement direction
-        Vector2 spreadOffset = Vector2.Perpendicular(trailDirection).normalized * (debrisIndex * trailSpread);
-        Vector2 lagOffset = -spreadOffset * (debrisIndex * trailLag);
-
-        Vector2 targetTrailPos = (Vector2)orbitCentre.position - trailDirection * 2f + spreadOffset + lagOffset;
-
-        transform.position = Vector2.Lerp(transform.position, targetTrailPos, Time.fixedDeltaTime * trailFollowSpeed);
     }
 
-    public void SetInitialAngle(float angleOffset)
+    public void SetInitialAngle(float targetOrbitAngle)
     {
-        currentAngle = angleOffset;
+        // only apply this once, right when the debris first enters orbit
+        if (currentState != State.Orbiting)
+        {
+            currentAngle = targetOrbitAngle;
+        }
     }
 
     private void OnDrawGizmos()
     {
         //draw line to gravity engine center if in range
         if (!orbitCentre)
-        {
             return;
-        }
 
-        if (isInOrbit == true)
+        if (!isInGravityRange)
+            return;
+
+        if (currentState == State.Orbiting)
         {
             Gizmos.color = Color.green;
         }
-        else if (isTrailing == true)
+        else if (currentState == State.Trailing)
         {
             Gizmos.color = Color.red;
         }
-        else if (isInGravityRange == true)
-        {
-            Gizmos.color = Color.yellow;
-        }
         else
         {
-            Gizmos.color = Color.gray;
+            Gizmos.color = Color.yellow;
         }
 
         Gizmos.DrawLine(transform.position, orbitCentre.position);

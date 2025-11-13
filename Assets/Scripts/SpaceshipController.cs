@@ -21,7 +21,7 @@ public class SpaceshipController : MonoBehaviour
 
 
     [Header("Dash/Roll Settings")]
-    //public float dashForce = 10f;
+    public float dashForce = 10f;
     public float dashCooldown = 1f;
     public float dashDuration = 0.15f;
     public float squashAmount = 0.5f;    //how much to squash/stretch
@@ -40,12 +40,12 @@ public class SpaceshipController : MonoBehaviour
     private Vector3 baseScale;
 
 
-    //[Header("Bullet Settings")]
-    //public GameObject bulletObj;
-    //public float bulletOffset = 0.25f;
-    //public float bulletSpeed = 100f;
-    //public float fireRate = 0.33f;
-    //private float fireTimer = 0f;
+    [Header("Bullet Settings")]
+    public GameObject bulletObj;
+    public float bulletOffset = 0.25f;
+    public float bulletSpeed = 100f;
+    public float fireRate = 0.33f;
+    private float fireTimer = 0f;
 
 
     [Header("FX Settings")]
@@ -53,39 +53,28 @@ public class SpaceshipController : MonoBehaviour
     public GameObject explosionFX;
     public ScreenFlashController screenFlash;
     public CameraShakeController cameraShake;
+    public GameOverUIController gameOverUI;
     public float screenShakeMultiplier = 1f;
 
-    public GameOverUIController gameOverUI;
 
-
-    private void Awake()
+    void Start()
     {
         rbShip = GetComponent<Rigidbody2D>();
         rbShip.gravityScale = 0;
-    }
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        //healthCurrent = healthMax;
+        healthCurrent = healthMax;
         baseScale = transform.localScale;
     }
 
-    // Update is called once per frame
     void Update()
     {
         HandleMovementInput();
-
         HandleDashInput();
         HandleSquash();
-        //UpdateFiring();
+        UpdateFiring();
     }
     
     void FixedUpdate()
     {
-        //float horiz = Input.GetAxisRaw("Horizontal"); //thrust
-        //float vert = Input.GetAxisRaw("Vertical"); //rotation
-
         ApplyThrust(movementInput.y);
         ApplyTorque(movementInput.x);
         ClampVelocity();
@@ -100,59 +89,46 @@ public class SpaceshipController : MonoBehaviour
 
         if (healthCurrent <= 0)
         {
-            //Explode();
+            Explode();
         }
     }
 
     public void Explode()
     {
         Instantiate(explosionFX, transform.position, Quaternion.identity);
+        screenFlash.HideFlash();
         StartCoroutine(GameOverRoutine());
-        Destroy(gameObject); // remove the spaceship!
+        Destroy(gameObject); 
     }
 
-    //private void UpdateFiring()
-    //{
-    //    bool isFiring = Input.GetKeyDown(KeyCode.Space);
-    //    fireTimer = fireTimer - Time.deltaTime; 
+    private void UpdateFiring()
+    {
+        bool isFiring = Input.GetKeyDown(KeyCode.Space);
+        fireTimer = fireTimer - Time.deltaTime;
 
-    //    if (isFiring && fireTimer <= 0f)
-    //    {
-    //        FireBullet();
-    //        fireTimer = fireRate;
-    //    }
-    //}
+        if (isFiring && fireTimer <= 0f)
+        {
+            FireBullet();
+            fireTimer = fireRate;
+        }
+    }
 
-    //public void FireBullet()
-    //{
-    //    Vector3 spawnPos = transform.position + transform.up * bulletOffset;
-    //    GameObject bullet = Instantiate(bulletObj, spawnPos, transform.rotation);
+    public void FireBullet()
+    {
+        Vector3 spawnPos = transform.position + transform.up * bulletOffset;
+        GameObject bullet = Instantiate(bulletObj, spawnPos, transform.rotation);
 
-    //    Rigidbody2D rbBullet = bullet.GetComponent<Rigidbody2D>();
-    //    rbBullet.AddForce(transform.up * bulletSpeed, ForceMode2D.Impulse);
+        Rigidbody2D rbBullet = bullet.GetComponent<Rigidbody2D>();
+        rbBullet.AddForce(transform.up * bulletSpeed, ForceMode2D.Impulse);
 
-    //    Destroy(bullet, 1f);
-    //}
+        Destroy(bullet, 1f);
+    }
 
     public void HandleDashInput()
     {
-        if (Time.time < lastDashTime + dashCooldown)
-            return;
-
-        //    if (Input.GetKeyDown(KeyCode.Q))
-        //    {
-        //        Dash(-transform.right);     // sidestep left
-        //    }
-        //    else if (Input.GetKeyDown(KeyCode.E))
-        //    {
-        //        Dash(transform.right);      // sidestep right
-        //    }
         if (Input.GetKeyDown(KeyCode.X))
         {
             QuickTurn();// flip 180
-            //cameraShake.StartSceenShake(screenShakeMultiplier);
-            //StartCoroutine(screenFlash.FlashRoutine()); //stays on after explosion.
-            //Explode();
         }
     }
 
@@ -200,20 +176,9 @@ public class SpaceshipController : MonoBehaviour
         }
 
         gameOverUI.Show(newHighScore);
-
         float GameOverDuration = 0.5f;
         yield return new WaitForSeconds(GameOverDuration);
     }
-
-
-
-    //private void Dash(Vector2 direction, bool isSideDash = false)
-    //{
-    //    rbShip.AddForce(direction.normalized * dashForce, ForceMode2D.Impulse);
-    //    lastDashTime = Time.time;
-    //    dashTimer = dashDuration;
-    //    SquashStretch(direction, true);
-    //}
 
     private void QuickTurn()
     {
@@ -243,32 +208,5 @@ public class SpaceshipController : MonoBehaviour
     {
         // smoothly return to normal scale
         transform.localScale = Vector3.Lerp(transform.localScale, baseScale, Time.deltaTime * squashSpeed);
-    }
-
-
-
-
-
-
-
-    public void Movement()
-    {
-        //INPUTS
-        movementInput.x = Input.GetAxisRaw("Horizontal"); //rotation
-        movementInput.y = Input.GetAxisRaw("Vertical"); //thrust
-
-        //THRUST
-        Vector2 shipThrust = transform.up * movementInput.y * thrustForce * Time.fixedDeltaTime;
-        rbShip.AddForce(shipThrust, ForceMode2D.Force);
-
-        //TORQUE
-        float shipRotate = movementInput.x * rotationSpeed * Time.fixedDeltaTime;
-        rbShip.AddTorque(-shipRotate);
-
-        //CLAMP SHIP VELOCITY
-        if (rbShip.linearVelocity.magnitude > maxVelocity)
-        {
-            rbShip.linearVelocity = rbShip.linearVelocity.normalized * maxVelocity;
-        }
     }
 }
