@@ -10,57 +10,61 @@ using static UnityEngine.RuleTile.TilingRuleOutput;
 public class SpaceshipController : MonoBehaviour
 {
     [Header("Health Settings")]
-    public float healthMax = 3f;
-    public float healthCurrent;
+    public float healthMax = 3f; // max health
+    public float healthCurrent; // current health
 
 
     [Header("Movement Settings")]
-    public float thrustForce = 200f;
-    public float rotationSpeed = 5f;
-    public float maxVelocity = 10f;
+    public float thrustForce = 200f; // force applied for thrust
+    public float rotationTorque = 5f; // torque applied for rotation
+    public float maxVelocity = 10f; // maximum speed
 
 
     [Header("Dash/Roll Settings")]
-    public float dashForce = 10f;
-    public float dashCooldown = 1f;
-    public float dashDuration = 0.15f;
-    public float squashAmount = 0.5f;    //how much to squash/stretch
-    public float squashSpeed = 10f;      //how fast it returns to normal
+    public float dashCooldown = 1f; // seconds between dashes
+    public float dashDuration = 0.15f; // duration of dash
+    public float squashAmount = 0.5f; //how much to squash/stretch
+    public float squashSpeed = 10f;  //how fast it returns to normal
 
 
     [Header("Private Settings")]
-    public int score = 0;
-
-
-    [Header("Private Settings")]
-    private Rigidbody2D rbShip;
-    private Vector2 movementInput;
-    private float lastDashTime = -10f;
-    private float dashTimer = 0f;
-    private Vector3 baseScale;
+    public int score = 0; // player score
+    public static SpaceshipController playerInstance; //reference to player ship
 
 
     [Header("Bullet Settings")]
-    public GameObject bulletObj;
-    public float bulletOffset = 0.25f;
-    public float bulletSpeed = 100f;
-    public float fireRate = 0.33f;
-    private float fireTimer = 0f;
+    public GameObject bulletPFB; // prefab for the bullet
+    public float bulletOffset = 0.25f; // distance in front of ship to spawn bullet
+    public float bulletForce = 100f; // force applied to the bullet
+    public float bulletRate = 0.33f; // seconds between shots
+    private float bulletTimer = 0f; // timer to track firing rate
+    public float bulletDuration = 2f; // seconds before bullet is destroyed
 
 
     [Header("FX Settings")]
     //public GameObject EngineFX;
-    public GameObject explosionFX;
-    public ScreenFlashController screenFlash;
-    public CameraShakeController cameraShake;
-    public GameOverUIController gameOverUI;
-    public float screenShakeMultiplier = 1f;
+    public GameObject explosionFX; // explosion effect prefab
+    public GameObject collsionFX; // collision effect prefab
+    public ScreenFlashController screenFlash; // screen flash controller
+    public CameraShakeController cameraShake; // camera shake controller
+    public GameOverUIController gameOverUI; // game over UI controller
+    public float screenShakeMultiplier = 1f; // multiplier for screen shake intensity
+    public ParticleSystem thrustFX;
+
+
+    [Header("Private Settings")]
+    private Rigidbody2D playerShipRB; // reference to the ship's Rigidbody2D
+    private Vector2 movementInput; // movement input vector
+    private float lastDashTime = -10f; // time when the last dash occurred
+    private float dashTimer = 0f; // timer to track dash duration
+    private Vector3 baseScale; //original scale of the ship
 
 
     void Start()
     {
-        rbShip = GetComponent<Rigidbody2D>();
-        rbShip.gravityScale = 0;
+        playerInstance = this;
+        playerShipRB = GetComponent<Rigidbody2D>();
+        playerShipRB.gravityScale = 0;
         healthCurrent = healthMax;
         baseScale = transform.localScale;
     }
@@ -71,6 +75,7 @@ public class SpaceshipController : MonoBehaviour
         HandleDashInput();
         HandleSquash();
         UpdateFiring();
+        HandleFX();
     }
     
     void FixedUpdate()
@@ -82,8 +87,12 @@ public class SpaceshipController : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
+        AudioManagerController.Instance.PlaySFX(AudioManagerController.Instance.shipCollisionSFX, AudioManagerController.Instance.normalCollisionVolume);
+
+
         healthCurrent = healthCurrent - damage;
 
+        Instantiate(collsionFX, transform.position, Quaternion.identity);
         StartCoroutine(screenFlash.FlashRoutine());
         cameraShake.StartSceenShake(screenShakeMultiplier);
 
@@ -95,6 +104,8 @@ public class SpaceshipController : MonoBehaviour
 
     public void Explode()
     {
+        AudioManagerController.Instance.PlaySFX(AudioManagerController.Instance.shipDeathSFX, AudioManagerController.Instance.normalCollisionVolume);
+
         Instantiate(explosionFX, transform.position, Quaternion.identity);
         screenFlash.HideFlash();
         StartCoroutine(GameOverRoutine());
@@ -103,25 +114,27 @@ public class SpaceshipController : MonoBehaviour
 
     private void UpdateFiring()
     {
-        bool isFiring = Input.GetKeyDown(KeyCode.Space);
-        fireTimer = fireTimer - Time.deltaTime;
+        bool isFiring = Input.GetKey(KeyCode.Space);
+        bulletTimer = bulletTimer - Time.deltaTime;
 
-        if (isFiring && fireTimer <= 0f)
-        {
+        if (isFiring && bulletTimer <= 0f)
+        {  
+            bulletTimer = bulletRate;
             FireBullet();
-            fireTimer = fireRate;
         }
     }
 
     public void FireBullet()
     {
+        AudioManagerController.Instance.PlaySFX(AudioManagerController.Instance.bulletSFX, AudioManagerController.Instance.normalCollisionVolume);
+
         Vector3 spawnPos = transform.position + transform.up * bulletOffset;
-        GameObject bullet = Instantiate(bulletObj, spawnPos, transform.rotation);
+        GameObject bulletInstance = Instantiate(bulletPFB, spawnPos, transform.rotation);
 
-        Rigidbody2D rbBullet = bullet.GetComponent<Rigidbody2D>();
-        rbBullet.AddForce(transform.up * bulletSpeed, ForceMode2D.Impulse);
+        Rigidbody2D bulletRB = bulletInstance.GetComponent<Rigidbody2D>();
+        bulletRB.AddForce(transform.up * bulletForce, ForceMode2D.Impulse);
 
-        Destroy(bullet, 1f);
+        Destroy(bulletInstance, bulletDuration);
     }
 
     public void HandleDashInput()
@@ -141,19 +154,19 @@ public class SpaceshipController : MonoBehaviour
     private void ApplyThrust(float thrust)
     {
         Vector2 shipThrust = transform.up * thrust * thrustForce * Time.fixedDeltaTime;
-        rbShip.AddForce(shipThrust, ForceMode2D.Force);
+        playerShipRB.AddForce(shipThrust, ForceMode2D.Force);
     }
 
     private void ApplyTorque(float rotate)
     {
-        float shipRotate = rotate * rotationSpeed * Time.fixedDeltaTime;
-        rbShip.AddTorque(-shipRotate);
+        float shipRotate = rotate * rotationTorque * Time.fixedDeltaTime;
+        playerShipRB.AddTorque(-shipRotate);
     }
 
     private void ClampVelocity()
     {
-        if (rbShip.linearVelocity.magnitude > maxVelocity)
-            rbShip.linearVelocity = rbShip.linearVelocity.normalized * maxVelocity;
+        if (playerShipRB.linearVelocity.magnitude > maxVelocity)
+            playerShipRB.linearVelocity = playerShipRB.linearVelocity.normalized * maxVelocity;
     }
 
     public int GetHighScore()
@@ -208,5 +221,34 @@ public class SpaceshipController : MonoBehaviour
     {
         // smoothly return to normal scale
         transform.localScale = Vector3.Lerp(transform.localScale, baseScale, Time.deltaTime * squashSpeed);
+    }
+
+    private void HandleFX()
+    {
+        if (!thrustFX)
+            return;
+
+        var emission = thrustFX.emission;
+        bool thrusting = movementInput.y > 0.1f;
+        AudioManagerController.Instance.PlayThruster(thrusting);
+
+        if (thrusting)
+        {
+            emission.rateOverTime = Mathf.Lerp(0, 30f, movementInput.y);
+
+            if (!thrustFX.isPlaying)
+            {
+                thrustFX.Play();
+            }
+        }
+        else
+        {
+            emission.rateOverTime = 0;
+
+            if (thrustFX.isPlaying)
+            {
+                thrustFX.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            } 
+        }
     }
 }

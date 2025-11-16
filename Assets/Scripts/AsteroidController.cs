@@ -1,3 +1,4 @@
+using UnityEditor.Rendering.LookDev;
 using UnityEngine;
 
 public class AsteroidController : MonoBehaviour
@@ -10,7 +11,10 @@ public class AsteroidController : MonoBehaviour
     private float healthCurrent; //current health of asteroid
 
     [Header("Asteroid Damage Settings")]
+    public GameObject collsionFX; // collision effect prefab
     public float collisionDamage = 1f; //damage dealt to player ship on collision
+    public CameraShakeController cameraShake; // camera shake controller
+    public float screenShakeMultiplier = 1f; // multiplier for screen shake intensity
 
     [Header("Asteroid Spawn Settings")]
     public int asteroidValue = 3; //value of asteroid for spawning purposes
@@ -34,17 +38,14 @@ public class AsteroidController : MonoBehaviour
     private SpaceshipController playerShip; //reference to player ship
 
 
-    private void Awake()
+    void Start()
     {
         healthCurrent = healthMax;
         rbAsteroid = GetComponent<Rigidbody2D>();
-    }
-
-    void Start()
-    {
         rbAsteroid.AddForce(Random.insideUnitCircle * asteroidVelocity, ForceMode2D.Impulse); //random initial force
         asteroidRotationSpeed = Random.Range(-asteroidVelocity, asteroidVelocity); //random rotation speed
-        playerShip = FindAnyObjectByType<SpaceshipController>(); //find player ship in scene
+        playerShip = SpaceshipController.playerInstance;
+        cameraShake = Camera.main.GetComponent<CameraShakeController>();
     }
 
     void Update()
@@ -54,16 +55,31 @@ public class AsteroidController : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        playerShip = collision.gameObject.gameObject.GetComponent<SpaceshipController>(); //check if player ship collided
-        if (playerShip != null)
+        SpaceshipController playerShip = collision.gameObject.GetComponent<SpaceshipController>();
+        if (playerShip)
         {
             playerShip.TakeDamage(collisionDamage); //damage player ship
+        }
+        else if (collision.gameObject.GetComponent<AsteroidController>())
+        {
+            // play SFX
+            AudioManagerController.Instance.PlaySFX(AudioManagerController.Instance.asteroidCollisionSFX, AudioManagerController.Instance.asteroidCollisionVolume);
+
+            // spawn dust particles
+            if (cameraShake)  // reuse or add a dedicated hit particle
+            {
+                cameraShake.StartSceenShake(screenShakeMultiplier * 0.5f);
+            }
         }
     }
 
     public void TakeDamage(float damage)
     {
+        AudioManagerController.Instance.PlaySFX(AudioManagerController.Instance.shipCollisionSFX, AudioManagerController.Instance.normalCollisionVolume);
+
         healthCurrent -= damage; //reduce health
+        cameraShake.StartSceenShake(screenShakeMultiplier);
+
         if (healthCurrent <= 0)
         {
             Explode(); //explode asteroid
@@ -89,6 +105,7 @@ public class AsteroidController : MonoBehaviour
 
         if (explosionFX)
         {
+            AudioManagerController.Instance.PlaySFX(AudioManagerController.Instance.explosionSFX, AudioManagerController.Instance.normalCollisionVolume);
             Instantiate(explosionFX, transform.position, transform.rotation); //create explosion effect
         }
 

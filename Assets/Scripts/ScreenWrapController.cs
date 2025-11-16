@@ -6,7 +6,7 @@ public class ScreenWrapController : MonoBehaviour
     private Camera cam;
     private float camHeight;
     private float camWidth;
-    float wrapMargin = 0.5f;
+    float wrapMargin = 0.25f;
 
 
     void Start()

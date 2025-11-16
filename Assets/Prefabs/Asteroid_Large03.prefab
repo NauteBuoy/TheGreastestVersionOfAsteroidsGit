@@ -32,7 +32,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.8, y: 0.8, z: 0.6}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -49,23 +49,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 799fbcc7b914ad1468a539aacedd5377, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  asteroidVelocity: 3
+  asteroidVelocity: 1
   healthMax: 3
+  collsionFX: {fileID: 5999593711267985948, guid: 655eed02206ea33438b6128524cb6bcd, type: 3}
   collisionDamage: 1
-  asteroidValue: 5
+  cameraShake: {fileID: 0}
+  screenShakeMultiplier: 1
+  asteroidValue: 3
   asteroidChunks:
   - {fileID: 4082472932018963504, guid: b64ef9f378cbcb2408714bdf2d25a51e, type: 3}
   - {fileID: 2428923140451405553, guid: a3e4db3c4b9ce584e89580314747a0c1, type: 3}
   - {fileID: 562265514404860698, guid: 8d7be979717efce4893b519e20775826, type: 3}
-  - {fileID: 2825977830538826595, guid: b2e39c1f158d78142b84a90b9829ab13, type: 3}
-  - {fileID: 3536935613360764983, guid: 0806e5ea718dc3b46bb89a28f303beb0, type: 3}
-  - {fileID: 3958864720268528133, guid: 471e7f3a4bc8a30409b1259c07b2d6a9, type: 3}
-  explosionFX: {fileID: 9119991457998186944, guid: 9e80bf40a52fe1c48b50ffc08133d49b, type: 3}
-  chunkMin: 0
-  chunkMax: 3
-  explosionDistance: 0.5
-  explosionForce: 10
-  scoreValue: 10
+  explosionFX: {fileID: 5999593711267985948, guid: e98c9b661b7d9f245aff5d8f894778fe, type: 3}
+  chunkMin: 1
+  chunkMax: 5
+  explosionDistance: 1
+  explosionForce: 1
+  scoreValue: 100
 --- !u!114 &-7282992205809512766
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -163,8 +163,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 9034778682122593547, guid: ac35a263bdf4ab04583e9b692826fff5, type: 3}
-  m_Color: {r: 0.09433961, g: 0.09433961, b: 0.09433961, a: 1}
+  m_Sprite: {fileID: 5419148439009658177, guid: 1f9c9ac7c213f354e91a5defe7787316, type: 3}
+  m_Color: {r: 0.882353, g: 0.882353, b: 0.882353, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -212,7 +212,7 @@ PolygonCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.59, y: 0.63}
+    oldSize: {x: 0.79, y: 0.75}
     newSize: {x: 0.52, y: 0.56}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -220,20 +220,11 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: 0.23399556, y: 0.20007294}
-      - {x: 0.23094639, y: 0.27006853}
-      - {x: 0.12748113, y: 0.3152805}
-      - {x: -0.0759956, y: 0.32609332}
-      - {x: -0.30744323, y: 0.15650564}
-      - {x: -0.2947197, y: -0.014444351}
-      - {x: -0.30798978, y: -0.16716689}
-      - {x: -0.2335743, y: -0.22732565}
-      - {x: -0.109973654, y: -0.21271682}
-      - {x: -0.07939048, y: -0.31585684}
-      - {x: 0.07219983, y: -0.32392362}
-      - {x: 0.24318427, y: -0.28587207}
-      - {x: 0.30806056, y: -0.09101996}
-      - {x: 0.28802085, y: 0.1288181}
+    - - {x: 0.22239059, y: 0.22325794}
+      - {x: -0.14566316, y: 0.3112273}
+      - {x: -0.32102302, y: -0.03251119}
+      - {x: 0.02546287, y: -0.31111658}
+      - {x: 0.32626814, y: -0.15392072}
   m_UseDelaunayMesh: 0
 --- !u!114 &-1121488782144986734
 MonoBehaviour:

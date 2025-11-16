@@ -9,17 +9,6 @@ public class CameraShakeController : MonoBehaviour
     public float shakeDuration = 0.2f;
 
 
-    [Header("Camera Target Settings")]
-    [SerializeField] private GameObject playerTarget;
-    [SerializeField] private float cameraSmoothing = 0.5f;
-    [SerializeField] private Vector3 cameraOffset;
-
-
-    [Header("Camera Bounds Settings")]
-    public Vector2 maxBoundary;
-    public Vector2 minBoundary;
-
-
     [Header("Private Settings")]
     private Coroutine shakeRoutine;
 
@@ -32,18 +21,6 @@ public class CameraShakeController : MonoBehaviour
     void Update()
     {
 
-    }
-
-    void FixedUpdate()
-    {
-        if (!playerTarget)
-            return;
-
-        Vector3 targetPosition = playerTarget.transform.position + cameraOffset;
-        targetPosition.x = Mathf.Clamp(targetPosition.x, minBoundary.x, maxBoundary.x);
-        targetPosition.y = Mathf.Clamp(targetPosition.y, minBoundary.y, maxBoundary.y);
-
-        transform.position = Vector3.Lerp(transform.position, targetPosition, cameraSmoothing);
     }
 
     public void StartSceenShake(float shakeMultiplier)

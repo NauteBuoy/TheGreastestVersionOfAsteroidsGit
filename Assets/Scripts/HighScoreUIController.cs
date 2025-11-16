@@ -10,7 +10,7 @@ public class HighScoreUIController : MonoBehaviour
 
     void Start()
     {
-        playerShip = Object.FindAnyObjectByType<SpaceshipController>();
+        AudioManagerController.Instance.PlayMusic(AudioManagerController.Instance.gameMusic, AudioManagerController.Instance.gameMusicVolume);
     }
 
     void Update()

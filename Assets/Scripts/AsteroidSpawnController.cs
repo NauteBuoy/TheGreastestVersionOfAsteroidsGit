@@ -15,12 +15,11 @@ public class AsteroidSpawnController : MonoBehaviour
 
     [Header("Private Settings")]
     private float spawnTimer = 0f; //timer to track spawn intervals
-    private SpaceshipController playerShip;
 
 
     void Start()
     {
-        playerShip = FindAnyObjectByType<SpaceshipController>();
+
     }
 
     void Update()
@@ -55,9 +54,6 @@ public class AsteroidSpawnController : MonoBehaviour
         if (asteroidArray.Length == 0) 
             return;
 
-        if (!playerShip)
-            return;
-
         //select random asteroid prefab
         int randomAsteroidIndex = Random.Range(0, asteroidArray.Length);
         GameObject asteroidToSpawn = asteroidArray[randomAsteroidIndex];
@@ -86,8 +82,9 @@ public class AsteroidSpawnController : MonoBehaviour
 
     public Vector2 ForceDirection(Vector2 asteroidSpawnPos)
     {
-        Vector2 playerPos = playerShip.transform.position;
-        Vector2 directionToPlayer = (playerPos - asteroidSpawnPos).normalized;
+        Vector2 targetPos = Vector2.zero;
+
+        Vector2 directionToPlayer = (targetPos - asteroidSpawnPos).normalized;
         Vector2 randomSkew = Random.insideUnitCircle * directionSkew;
         Vector2 endForceDirection = (directionToPlayer + randomSkew).normalized;
         return endForceDirection;
