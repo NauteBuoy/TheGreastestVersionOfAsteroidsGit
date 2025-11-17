@@ -271,11 +271,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shakeDistance: 0.3
   shakeDuration: 0.2
-  playerTarget: {fileID: 0}
-  cameraSmoothing: 0.5
-  cameraOffset: {x: 0, y: 0, z: 0}
-  maxBoundary: {x: 0, y: 0}
-  minBoundary: {x: 0, y: 0}
+  motionAmount: 0.1
+  motionSpeed: 2
 --- !u!1 &226869960
 GameObject:
   m_ObjectHideFlags: 0
@@ -465,9 +462,9 @@ MonoBehaviour:
   - {fileID: 3958864720268528133, guid: 471e7f3a4bc8a30409b1259c07b2d6a9, type: 3}
   spawnInterval: 0.5
   intitialForce: 50
-  spawnThreshold: 20
-  spawnOffset: 1.2
-  directionSkew: 60
+  spawnThreshold: 25
+  spawnOffset: 1.5
+  directionSkew: 50
 --- !u!1 &352492992
 GameObject:
   m_ObjectHideFlags: 0
@@ -1465,15 +1462,15 @@ PrefabInstance:
     - target: {fileID: 6231258660799364976, guid: e3a5bd20f6339024f8105208fa01f42b, type: 3}
       propertyPath: gameMusic
       value: 
-      objectReference: {fileID: 8300000, guid: dd93973f46edc214dab72510d96fc7e5, type: 3}
+      objectReference: {fileID: 8300000, guid: 44a79099a3950d740a4887cce6552399, type: 3}
     - target: {fileID: 6231258660799364976, guid: e3a5bd20f6339024f8105208fa01f42b, type: 3}
       propertyPath: menuMusic
       value: 
-      objectReference: {fileID: 8300000, guid: 44a79099a3950d740a4887cce6552399, type: 3}
+      objectReference: {fileID: 8300000, guid: dd93973f46edc214dab72510d96fc7e5, type: 3}
     - target: {fileID: 6231258660799364976, guid: e3a5bd20f6339024f8105208fa01f42b, type: 3}
       propertyPath: thrusterSFX
       value: 
-      objectReference: {fileID: 8300000, guid: 7504918b1bc3a8b42b63296e48997ea0, type: 3}
+      objectReference: {fileID: 8300000, guid: c50e317471219b843a93592b12667422, type: 3}
     - target: {fileID: 6231258660799364976, guid: e3a5bd20f6339024f8105208fa01f42b, type: 3}
       propertyPath: collisionSFX
       value: 
@@ -1524,6 +1521,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7076189318509768230, guid: e3a5bd20f6339024f8105208fa01f42b, type: 3}
       propertyPath: Loop
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7076189318509768230, guid: e3a5bd20f6339024f8105208fa01f42b, type: 3}
+      propertyPath: m_PlayOnAwake
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7190238933737451127, guid: e3a5bd20f6339024f8105208fa01f42b, type: 3}

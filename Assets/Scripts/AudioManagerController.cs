@@ -28,6 +28,11 @@ public class AudioManagerController : MonoBehaviour
 
     void Start()
     {
+        thrusterAudioSource.clip = thrusterSFX;
+        thrusterAudioSource.loop = true;
+        thrusterAudioSource.playOnAwake = false;
+
+
         if (Instance)
         {
             Destroy(gameObject);
@@ -73,7 +78,10 @@ public class AudioManagerController : MonoBehaviour
         }
         else
         {
-            thrusterAudioSource.Stop();
+            if (thrusterAudioSource.isPlaying)
+            {
+                thrusterAudioSource.Stop();
+            }
         }
     }
 }

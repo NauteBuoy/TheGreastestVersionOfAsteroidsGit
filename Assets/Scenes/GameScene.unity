@@ -505,6 +505,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shakeDistance: 0.3
   shakeDuration: 0.2
+  motionAmount: 0.1
+  motionSpeed: 2
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -715,9 +717,6 @@ MonoBehaviour:
   - {fileID: 4082472932018963504, guid: b64ef9f378cbcb2408714bdf2d25a51e, type: 3}
   - {fileID: 2428923140451405553, guid: a3e4db3c4b9ce584e89580314747a0c1, type: 3}
   - {fileID: 562265514404860698, guid: 8d7be979717efce4893b519e20775826, type: 3}
-  - {fileID: 2825977830538826595, guid: b2e39c1f158d78142b84a90b9829ab13, type: 3}
-  - {fileID: 3536935613360764983, guid: 0806e5ea718dc3b46bb89a28f303beb0, type: 3}
-  - {fileID: 3958864720268528133, guid: 471e7f3a4bc8a30409b1259c07b2d6a9, type: 3}
   spawnInterval: 3
   intitialForce: 100
   spawnThreshold: 15
@@ -834,9 +833,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 445393722}
     - target: {fileID: 109561785298019068, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
+      propertyPath: shipVisual
+      value: 
+      objectReference: {fileID: 1843814293}
+    - target: {fileID: 109561785298019068, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
       propertyPath: cameraShake
       value: 
       objectReference: {fileID: 519420033}
+    - target: {fileID: 109561785298019068, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
+      propertyPath: maxVelocity
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 109561785298019068, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
       propertyPath: screenFlash
       value: 
@@ -965,6 +972,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Spaceship
       objectReference: {fileID: 0}
+    - target: {fileID: 5186663330124563024, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
+      propertyPath: wrapFX
+      value: 
+      objectReference: {fileID: 2108328563044547205, guid: 18712511cb9528940a0ac0000a8dd2e4, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1302,7 +1313,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 999
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
   m_sharedMaterial: {fileID: 2164040, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
@@ -1419,7 +1430,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 999
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
   m_sharedMaterial: {fileID: 2164040, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
@@ -1515,7 +1526,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 450}
-  m_SizeDelta: {x: 1600, y: 100}
+  m_SizeDelta: {x: 2378.6758, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!198 &1196719310 stripped
 ParticleSystem:
@@ -2199,8 +2210,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d480dc2829ab1e439e47d884ac205bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scoreTextBox: {fileID: 1161820056}
-  scorePanel: {fileID: 1954735133}
+  scoreText: {fileID: 0}
+  punchScale: 1.25
+  punchSpeed: 12
 --- !u!1 &1585470867
 GameObject:
   m_ObjectHideFlags: 0
@@ -2258,7 +2270,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 999
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
   m_sharedMaterial: {fileID: 2164040, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
@@ -2470,6 +2482,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1677534890}
   m_CullTransparentMesh: 1
+--- !u!4 &1843814293 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5314644484728716537, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
+  m_PrefabInstance: {fileID: 787121385}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1954735133
 GameObject:
   m_ObjectHideFlags: 0
@@ -2501,8 +2518,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d480dc2829ab1e439e47d884ac205bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scoreTextBox: {fileID: 1161820056}
-  scorePanel: {fileID: 1954735133}
+  scoreText: {fileID: 1161820056}
+  punchScale: 15.56
+  punchSpeed: 12
 --- !u!114 &1954735135
 MonoBehaviour:
   m_ObjectHideFlags: 0

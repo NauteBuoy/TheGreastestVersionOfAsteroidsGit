@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEditor.Rendering.LookDev;
 using UnityEngine;
 
@@ -13,7 +14,7 @@ public class AsteroidController : MonoBehaviour
     [Header("Asteroid Damage Settings")]
     public GameObject collsionFX; // collision effect prefab
     public float collisionDamage = 1f; //damage dealt to player ship on collision
-    public CameraShakeController cameraShake; // camera shake controller
+    public CameraController cameraShake; // camera shake controller
     public float screenShakeMultiplier = 1f; // multiplier for screen shake intensity
 
     [Header("Asteroid Spawn Settings")]
@@ -45,7 +46,7 @@ public class AsteroidController : MonoBehaviour
         rbAsteroid.AddForce(Random.insideUnitCircle * asteroidVelocity, ForceMode2D.Impulse); //random initial force
         asteroidRotationSpeed = Random.Range(-asteroidVelocity, asteroidVelocity); //random rotation speed
         playerShip = SpaceshipController.playerInstance;
-        cameraShake = Camera.main.GetComponent<CameraShakeController>();
+        cameraShake = Camera.main.GetComponent<CameraController>();
     }
 
     void Update()
@@ -90,7 +91,8 @@ public class AsteroidController : MonoBehaviour
     {
         if (playerShip)
         {
-            playerShip.score += scoreValue; //increase player score
+            playerShip.score += scoreValue; //increase player score  
+            ScoreUIController.Instance.UpdateScore(playerShip.score);
         }
 
         int numChunks = Random.Range(chunkMin, chunkMax + 1);

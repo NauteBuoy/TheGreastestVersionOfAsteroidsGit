@@ -238,3 +238,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78e617a1b9a95a2418bcdaff33c8f0e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  wrapFX: {fileID: 2108328563044547205, guid: 6bd294208398afb4fb3dbc5fad1840d7, type: 3}

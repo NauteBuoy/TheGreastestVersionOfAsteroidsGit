@@ -7,6 +7,9 @@ public class ScreenWrapController : MonoBehaviour
     private float camHeight;
     private float camWidth;
     float wrapMargin = 0.25f;
+    public ParticleSystem wrapFX;
+    private Vector3 lastPos;
+
 
 
     void Start()
@@ -14,6 +17,7 @@ public class ScreenWrapController : MonoBehaviour
         cam = Camera.main;
         camHeight = cam.orthographicSize;
         camWidth = cam.aspect * camHeight;
+        lastPos = transform.position;
     }
 
     void LateUpdate()
@@ -39,5 +43,15 @@ public class ScreenWrapController : MonoBehaviour
         }
 
         transform.position = pos;
+        
+        bool wrapped = Mathf.Abs(pos.x - lastPos.x) > camWidth * 1.5f || Mathf.Abs(pos.y - lastPos.y) > camHeight * 1.5f;
+
+        if (wrapped && wrapFX)
+        {
+            Instantiate(wrapFX, pos, Quaternion.identity);
+        }
+
+        lastPos = pos;
+
     }
 }
