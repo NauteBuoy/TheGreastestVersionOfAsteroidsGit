@@ -129,10 +129,10 @@ GameObject:
   m_Component:
   - component: {fileID: 2356628942725642436}
   - component: {fileID: 109561785298019068}
-  - component: {fileID: 5463321455532208039}
+  - component: {fileID: 2967369431412298303}
   - component: {fileID: 4213149413820993017}
-  - component: {fileID: 5186663330124563024}
   - component: {fileID: 2012345043519161284}
+  - component: {fileID: 5186663330124563024}
   m_Layer: 0
   m_Name: Spaceship
   m_TagString: Untagged
@@ -170,57 +170,55 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shipVisual: {fileID: 5314644484728716537}
-  visualRotationLag: 10
   shipRenderer: {fileID: 1662932528079986421}
-  healthMax: 10
-  healthCurrent: 0
+  maxHeat: 100
+  currentHeat: 0
+  heatRateThrust: 6
+  passiveCoolRate: 8
   thrustForce: 1200
+  thrustForceHeatFactor: 2
   rotationTorque: 600
-  maxVelocity: 4
-  velocityStretchX: 0.15
-  velocityStretchY: 0.25
-  velocityStretchLerp: 4
-  brCooldown: 0.2
-  brDuration: 0.2
+  maxVelocity: 5
+  maxVelocityHeatFactor: 2.5
+  velocityStretchX: 0.25
+  velocityStretchY: 0.45
+  dischargeController: {fileID: 2967369431412298303}
+  dischargeOffset: 0.2
   squashAmount: 0.6
-  squashSpeed: 10
+  squashStretchReturnSpeed: 10
   score: 0
   combo: 0
-  comboResetTime: 1.5
+  comboResetTime: 2
   comboTimer: 0
-  bulletPFB: {fileID: 5992441658956003216, guid: ba0b6cc1e7208b94d9da3164ba70429c, type: 3}
-  bulletOffset: 0.2
-  bulletForce: 10
-  bulletRate: 0.2
   explosionFX: {fileID: 5999593711267985948, guid: e98c9b661b7d9f245aff5d8f894778fe, type: 3}
   collsionFX: {fileID: 5999593711267985948, guid: 655eed02206ea33438b6128524cb6bcd, type: 3}
-  muzzleFlashFX: {fileID: 5999593711267985948, guid: 801e96682e7cda94094a9a3f4d893e25, type: 3}
   thrustFX: {fileID: 7218924136677830270}
   screenFlash: {fileID: 0}
   gameOverUI: {fileID: 0}
   cameraShake: {fileID: 0}
-  screenShakeMultiplier: 2
---- !u!114 &5463321455532208039
+  screenShakeDamageMultiplier: 2
+  visualRotationLag: 10
+--- !u!114 &2967369431412298303
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5073917542897289987}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 849bdf5b984e283419edb1dd7ba145cf, type: 3}
+  m_Script: {fileID: 11500000, guid: a0cc4fbd5e1640b4fb865689a287fc17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gravityRadius: 3
-  gravityStrength: 3
-  orbitRadius: 1
-  orbitspacingLerpSpeed: 1.2
-  playerSpeedThreshold: 6
-  trackedDebris: []
-  debrisMask:
-    serializedVersion: 2
-    m_Bits: 64
+  heatwaveVFX: {fileID: 2108328563044547205, guid: 6bd294208398afb4fb3dbc5fad1840d7, type: 3}
+  dischargeVFX: {fileID: 2108328563044547205, guid: 655eed02206ea33438b6128524cb6bcd, type: 3}
+  cameraShake: {fileID: 0}
+  baseDischargeRecoil: 1
+  maxDischargeRecoil: 10
+  baseDischargeRange: 1
+  maxDischargeRange: 10
+  heatwaveRadius: 0.5
+  dischargeCooldown: 0.25
 --- !u!50 &4213149413820993017
 Rigidbody2D:
   serializedVersion: 5
@@ -248,19 +246,6 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 0
---- !u!114 &5186663330124563024
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5073917542897289987}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 78e617a1b9a95a2418bcdaff33c8f0e8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  wrapFX: {fileID: 2108328563044547205, guid: 18712511cb9528940a0ac0000a8dd2e4, type: 3}
 --- !u!60 &2012345043519161284
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -316,6 +301,19 @@ PolygonCollider2D:
       - {x: -0.0003326889, y: 0.16104168}
       - {x: -0.030674832, y: 0.12648143}
   m_UseDelaunayMesh: 0
+--- !u!114 &5186663330124563024
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5073917542897289987}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78e617a1b9a95a2418bcdaff33c8f0e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  wrapFX: {fileID: 2108328563044547205, guid: 18712511cb9528940a0ac0000a8dd2e4, type: 3}
 --- !u!1001 &8749523110127506683
 PrefabInstance:
   m_ObjectHideFlags: 0

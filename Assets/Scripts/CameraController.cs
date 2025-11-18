@@ -20,7 +20,6 @@ public class CameraController : MonoBehaviour
     private Coroutine shakeRoutine;
 
 
-
     void Start()
     {
         basePos = transform.localPosition;
@@ -33,13 +32,13 @@ public class CameraController : MonoBehaviour
 
     void LateUpdate()
     {
-        if (!SpaceshipController.playerInstance)
+        if (!SpaceshipController.playerShipInstance)
         {
             transform.localPosition = basePos + targetShakeOffset;
             return;
         }
 
-        float velocity = SpaceshipController.playerInstance.GetVelocity();
+        float velocity = SpaceshipController.playerShipInstance.GetVelocityNorm();
         float offsetX = Mathf.Sin(Time.time * motionSpeed) * motionAmount * velocity;
         float offsetY = Mathf.Cos(Time.time * motionSpeed * 1.3f) * motionAmount * velocity;
         Vector3 velocityOffset = new Vector3(offsetX, offsetY, 0f);

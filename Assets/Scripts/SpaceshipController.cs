@@ -1,127 +1,312 @@
 ﻿using System.Collections;
-using System.Diagnostics;
-using UnityEditor.Rendering.LookDev;
+using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.SocialPlatforms.Impl;
-using UnityEngine.UIElements;
 using UnityEngine.VFX;
-using static UnityEngine.RuleTile.TilingRuleOutput;
 
 public class SpaceshipController : MonoBehaviour
 {
     [Header("Ship Reference Settings")]
-    public static SpaceshipController playerInstance; //reference to player ship
-    private Rigidbody2D playerShipRB; // reference to the ship's Rigidbody2D
-    private Vector2 movementInput; // movement input vector
-    private Vector3 baseScale; //original scale of the ship
-    public UnityEngine.Transform shipVisual; // reference to the ship's visual transform
-    public float visualRotationLag = 10f; // how quickly the visual lags behind rotation
-    public SpriteRenderer shipRenderer;
+    public static SpaceshipController playerShipInstance; //reference to THIS player ship
+    public Transform shipVisual; //reference to player ship sprite transform
+    public SpriteRenderer shipRenderer; //reference to player ship sprite renderer
+    private Rigidbody2D playerShipRB; //reference to player ship Rigidbody2D
+    private Vector2 playerMovementInput; //player movement input vector
+    private Vector3 shipBaseScale; //original scale of the ship
 
 
-    [Header("Health Settings")]
-    public float healthMax = 10f; // max health
-    public float healthCurrent; // current health
+    [Header("Heat Settings")]
+    public float maxHeat = 100f; //maximum heat threshold
+    public float currentHeat = 0f; //current heat
+    public float heatRateThrust = 6f; //amount of heat generated per second of thrust
+    public float passiveCoolRate = 12f; //amount of heat cooled per second
 
 
     [Header("Movement Settings")]
-    public float thrustForce = 1200f; // force applied for thrust
-    public float rotationTorque = 100f; // torque applied for rotation
-    public float maxVelocity = 6f; // maximum speed
-    public float velocityStretchX = 0.15f; // how much to squish X at top speed
-    public float velocityStretchY = 0.25f; // how much to stretch Y at top speed
-    public float velocityStretchLerp = 4f; // lerp speed for the visual stretch
+    public float thrustForce = 1200f; //force applied to ship on thrust
+    public float thrustForceHeatFactor = 0.01f; //How much % extra thrust is added per heat point
+    public float rotationTorque = 100f; //torque applied for rotation
+    public float maxVelocity = 6f; //maximum speed threshold
+    public float maxVelocityHeatFactor = 0.015f; //How much % extra max velocity scales per heat point 
+    public float velocityStretchX = 0.15f; //how much to squish X at top speed
+    public float velocityStretchY = 0.25f; //how much to stretch Y at top speed
+    private float baseMaxVelocity; //base max velocity
+    private float baseThrustForce; //base thrust force
 
 
-    [Header("Barrel Roll Settings")]
-    public float brCooldown = 0.2f; // seconds between dashes
-    public float brDuration = 0.2f; // duration of dash
-    public float squashAmount = 0.6f; //how much to squash/stretch
-    public float squashSpeed = 10f;  //how fast it returns to normal
+    [Header("Discharge/Barrel Roll Settings")]
+    public DischargeController dischargeController;
+    public float dischargeOffset = 0.2f; //distance in front of ship to spawn bullet
+    public float squashAmount = 0.6f; //how much does ship squash/stretch
+    public float squashStretchReturnSpeed = 10f;  //how fast ship returns to base scale
 
 
     [Header("Score Settings")]
-    public int score = 0; // player score
-    public int combo = 0; // current combo count
-    public float comboResetTime = 1.5f; // time to reset combo
-    public float comboTimer = 0f; // timer to track combo reset
-
-
-    [Header("Bullet Settings")]
-    public GameObject bulletPFB; // prefab for the bullet
-    public float bulletOffset = 0.2f; // distance in front of ship to spawn bullet
-    public float bulletForce = 10f; // force applied to the bullet
-    public float bulletRate = 0.2f; // seconds between shots
-    private float bulletTimer = 0f; // timer to track firing rate
+    public int score = 0; //current player score
+    public int combo = 0; //current combo count
+    public float comboResetTime = 1.5f; //time it takes to reset combo
+    public float comboTimer = 0f; //timer to track combo reset
 
 
     [Header("FX Settings")]
     public GameObject explosionFX; // explosion effect prefab
     public GameObject collsionFX; // collision effect prefab
-    public GameObject muzzleFlashFX; // muzzle flash effect prefab
     public ParticleSystem thrustFX; // thrust particle system
     public ScreenFlashController screenFlash; // screen flash controller
     public GameOverUIController gameOverUI; // game over UI controller
     public CameraController cameraShake; // camera shake controller
-    public float screenShakeMultiplier = 2f; // multiplier for screen shake intensity
-
+    public float screenShakeDamageMultiplier = 2f; // multiplier for screen shake intensity
+    public float visualRotationLag = 10f; // how quickly the visual lags behind rotation
 
     void Start()
     {
-        playerInstance = this;
+        playerShipInstance = this;
         playerShipRB = GetComponent<Rigidbody2D>();
         playerShipRB.gravityScale = 0;
 
-        score = 0;
-        healthCurrent = healthMax;
-        baseScale = transform.localScale;
+        shipBaseScale = transform.localScale;
+        baseMaxVelocity = maxVelocity;
+        baseThrustForce = thrustForce;
+
+        if (!cameraShake)
+        {
+            cameraShake = Object.FindAnyObjectByType<CameraController>();
+        }
+        if (!screenFlash)
+        {
+            screenFlash = Object.FindAnyObjectByType<ScreenFlashController>();
+        }
+        if (!gameOverUI)
+        {
+            gameOverUI = Object.FindAnyObjectByType<GameOverUIController>();
+        }  
     }
 
-    void Update() 
+    void Update()
     {
         HandleMovementInput();
-        HandleDashInput();
-        HandleSquash();
-        UpdateFiring();
+        HandleHeat();
+        HandleDiscarge();
         HandleFX();
-        HandleSpeedStretch();
+        HandleVisualSquashStretch();
         HandleComboTimer();
     }
 
     void FixedUpdate()
     {
-        ApplyThrust(movementInput.y);
-        ApplyTorque(movementInput.x);
-        ClampVelocity();
+        HandleMovementPhysics();
     }
 
     private void LateUpdate()
     {
-        // Smoothly rotate the ship visual to match the ship's rotation
-        if (shipVisual)
-        {
-            //shipVisual.rotation = Quaternion.Lerp(shipVisual.rotation, transform.rotation, Time.deltaTime * visualRotationLag);
+        HandleVisualLagRotation();
+    }
 
-            Quaternion targetRotation = Quaternion.Euler(0, 0, transform.eulerAngles.z);
-            shipVisual.rotation = Quaternion.Slerp(shipVisual.rotation, targetRotation, Time.deltaTime * visualRotationLag);
+    private void HandleMovementInput()
+    {
+        playerMovementInput.x = Input.GetAxisRaw("Horizontal"); //rotation
+        playerMovementInput.y = Input.GetAxisRaw("Vertical"); //thrust
+    }
+
+    void HandleHeat()
+    {
+        bool thrusting = playerMovementInput.y > 0.1f;
+        // Handle heat generation and cooling
+        if (thrusting)
+        {
+            currentHeat = Mathf.Min(maxHeat, currentHeat + heatRateThrust * Time.deltaTime);
+        }
+        else
+        {
+            currentHeat = Mathf.Max(0f, currentHeat - passiveCoolRate * Time.deltaTime);
+        }
+        // clamp safety
+        currentHeat = Mathf.Clamp(currentHeat, 0f, maxHeat);
+        // optional: update ship glow here
+        UpdateHeatVisuals();
+
+        if (currentHeat >= maxHeat)
+        {
+            Explode();
+        }
+    }
+
+    public void AddHeat(float amount)
+    {
+        currentHeat = Mathf.Clamp(currentHeat + amount, 0f, maxHeat);
+    }
+
+    public float GetHeatNorm()
+    {
+        return Mathf.Clamp01(currentHeat / maxHeat);
+    }
+
+    void HandleMovementPhysics()
+    {
+        ApplyThrust(playerMovementInput.y);
+        ApplyTorque(playerMovementInput.x);
+        ClampVelocity();
+    }
+
+    private void ApplyThrust(float thrust)
+    {
+        float heatBoost = 1f + (GetHeatNorm() * thrustForceHeatFactor);
+        float heatedThrust = baseThrustForce * heatBoost;
+
+        playerShipRB.AddForce(transform.up * thrust * heatedThrust * Time.fixedDeltaTime, ForceMode2D.Force);
+    }
+
+    private void ApplyTorque(float rotation)
+    {
+        float torque = rotation * rotationTorque * Time.fixedDeltaTime;
+        playerShipRB.AddTorque(-torque);
+    }
+
+    private void ClampVelocity()
+    {
+        float heatBoost = 1f + (GetHeatNorm() * maxVelocityHeatFactor);
+        float maxVelocity = baseMaxVelocity * heatBoost;
+
+        if (playerShipRB.linearVelocity.magnitude > maxVelocity)
+        {
+            playerShipRB.linearVelocity = playerShipRB.linearVelocity.normalized * maxVelocity;
+        }
+    }
+
+    private void HandleDiscarge()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            TryDischargeHeat();
+        }
+    }
+
+    void TryDischargeHeat()
+    {
+        if (!playerShipRB)
+            return;
+        if (!dischargeController.CanDischarge())
+            return;
+
+        float heatNorm = GetHeatNorm();
+        Vector2 shipDirection = transform.up.normalized;
+
+        //get discharge output results
+        var dischargeOutputs = dischargeController.DischargeHeatResults(currentHeat, maxHeat, shipDirection, heatNorm);
+
+        //cancel velocity before recoil
+        float cancelVelocityFactor = Mathf.Lerp(0.05f, 0.55f, heatNorm);
+        playerShipRB.linearVelocity *= (1f - cancelVelocityFactor);
+
+        // Flip ship instantly
+        Vector2 recoilDirection = shipDirection;
+        transform.up = -transform.up;
+
+        // Apply recoil
+        float recoilForce = dischargeOutputs.recoilAmount;
+        playerShipRB.AddForce(-recoilDirection * recoilForce, ForceMode2D.Impulse);
+
+        DischargeVisualSquash();
+
+        // Reduce heat
+        currentHeat = Mathf.Max(0, currentHeat - dischargeOutputs.heatSpent);
+    }
+
+    private void DischargeVisualSquash()
+    {
+        transform.localScale = new Vector3(shipBaseScale.x * (1f + squashAmount), shipBaseScale.y * (1f - squashAmount), shipBaseScale.z);
+    }
+
+    private void HandleFX()
+    {
+        if (!thrustFX)
+            return;
+
+        bool thrusting = playerMovementInput.y > 0.1f;
+        float heatNorm = GetHeatNorm();
+
+        var emission = thrustFX.emission;
+        float targetRate = Mathf.Lerp(0f, 60f, Mathf.Clamp01(playerMovementInput.y) + (heatNorm * 40f));
+        emission.rateOverTime = targetRate;
+
+        AudioManagerController.Instance.PlayThruster(thrusting);
+
+        if (thrusting)
+        {
+            if (!thrustFX.isPlaying)
+            {
+                thrustFX.Play();
+            }
+        }
+        else
+        {
+            if (thrustFX.isPlaying)
+            {
+                thrustFX.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            }
+        }
+    }
+
+    void HandleVisualLagRotation()
+    {
+        if (!shipVisual)
+            return;
+
+        Quaternion targetRotation = Quaternion.Euler(0, 0, transform.eulerAngles.z);
+        shipVisual.rotation = Quaternion.Slerp(shipVisual.rotation, targetRotation, Time.deltaTime * visualRotationLag);
+    }
+
+    void HandleVisualSquashStretch()
+    {
+        float velocityNorm = GetVelocityNorm();
+
+        Vector3 targetVelocityScale = new Vector3(shipBaseScale.x * (1f - velocityStretchX * velocityNorm), shipBaseScale.y * (1f + velocityStretchY * velocityNorm), shipBaseScale.z);
+
+        transform.localScale = Vector3.Lerp(transform.localScale, targetVelocityScale, Time.deltaTime * squashStretchReturnSpeed);
+    }
+
+    public float GetVelocityNorm()
+    {
+        float currentShipVelocity = playerShipRB.linearVelocity.magnitude;
+        float maxVelocity = baseMaxVelocity * (1f + maxVelocityHeatFactor * maxHeat);
+        float velocityNorm = Mathf.InverseLerp(0f, maxVelocity, currentShipVelocity);
+        return velocityNorm;
+    }
+
+    private void UpdateHeatVisuals()
+    {
+        float heatNorm = GetHeatNorm();
+
+        Color coolEngine = Color.white;
+        Color warmEngine = new Color(1f, 0.65f, 0.25f);
+        Color ultraHotEngine = Color.Lerp(warmEngine, Color.red, Mathf.Clamp01((heatNorm - 0.85f) / 0.15f));
+
+        Color shipHeatColour = Color.Lerp(coolEngine, warmEngine, heatNorm);
+
+        if (heatNorm > 0.85f) shipHeatColour = ultraHotEngine;
+
+        if (shipRenderer)
+        {
+            shipRenderer.color = shipHeatColour;
         }
     }
 
     public void TakeDamage(float damage)
     {
-        UpdateShipDamageVisual();
+        AddHeat(damage);
+        UpdateHeatVisuals();
 
-        healthCurrent = healthCurrent - damage;
         AudioManagerController.Instance.PlaySFX(AudioManagerController.Instance.shipCollisionSFX, AudioManagerController.Instance.normalCollisionVolume);
 
-        Instantiate(collsionFX, transform.position, Quaternion.identity);
+        if (collsionFX)
+        {
+            Instantiate(collsionFX, transform.position, Quaternion.identity);
+        }
 
         StartCoroutine(screenFlash.FlashRoutine());
-        cameraShake.StartSceenShake(screenShakeMultiplier);
 
-        if (healthCurrent <= 0)
+        if (cameraShake)
         {
-            Explode();
+            cameraShake.StartSceenShake(screenShakeDamageMultiplier);
         }
     }
 
@@ -129,75 +314,15 @@ public class SpaceshipController : MonoBehaviour
     {
         AudioManagerController.Instance.PlaySFX(AudioManagerController.Instance.shipDeathSFX, AudioManagerController.Instance.normalCollisionVolume);
 
-        Instantiate(explosionFX, transform.position, Quaternion.identity);
+        if (explosionFX)
+        {
+            Instantiate(explosionFX, transform.position, Quaternion.identity);
+        }
 
         screenFlash.HideFlash();
 
         StartCoroutine(GameOverRoutine());
-
-        Destroy(gameObject); 
-    }
-
-    private void UpdateFiring()
-    {
-        bool isFiring = Input.GetKey(KeyCode.Space);
-        bulletTimer = bulletTimer - Time.deltaTime;
-
-        if (isFiring && bulletTimer <= 0f)
-        {  
-            bulletTimer = bulletRate;
-            FireBullet();
-        }
-    }
-
-    public void FireBullet()
-    {
-        AudioManagerController.Instance.PlaySFX(AudioManagerController.Instance.bulletSFX, AudioManagerController.Instance.normalCollisionVolume);
-
-        Vector3 spawnPos = transform.position + transform.up * bulletOffset;
-        Instantiate(muzzleFlashFX, spawnPos, transform.rotation);
-
-        GameObject bulletInstance = Instantiate(bulletPFB, spawnPos, transform.rotation);
-        Rigidbody2D bulletRB = bulletInstance.GetComponent<Rigidbody2D>();
-        bulletRB.AddForce(transform.up * bulletForce, ForceMode2D.Impulse);
-
-        playerShipRB.AddForce(-transform.up * 1f, ForceMode2D.Impulse);
-
-        cameraShake.StartSceenShake(0.025f);
-    }
-
-    public void HandleDashInput()
-    {
-        if (Input.GetKeyDown(KeyCode.X))
-        {
-            QuickTurn();// flip 180
-        }
-    }
-
-    private void HandleMovementInput()
-    {
-        movementInput.x = Input.GetAxisRaw("Horizontal"); //rotation
-        movementInput.y = Input.GetAxisRaw("Vertical"); //thrust
-    }
-
-    private void ApplyThrust(float thrust)
-    {
-        Vector2 shipThrust = transform.up * thrust * thrustForce * Time.fixedDeltaTime;
-        playerShipRB.AddForce(shipThrust, ForceMode2D.Force);
-    }
-
-    private void ApplyTorque(float rotate)
-    {
-        float shipRotate = rotate * rotationTorque * Time.fixedDeltaTime;
-        playerShipRB.AddTorque(-shipRotate);
-    }
-
-    private void ClampVelocity()
-    {
-        if (playerShipRB.linearVelocity.magnitude > maxVelocity)
-        {
-            playerShipRB.linearVelocity = playerShipRB.linearVelocity.normalized * maxVelocity;
-        }
+        Destroy(gameObject);
     }
 
     public int GetHighScore()
@@ -205,7 +330,7 @@ public class SpaceshipController : MonoBehaviour
         return PlayerPrefs.GetInt("HighScore", 0);
     }
 
-    public void SetHighScore (int highScore)
+    public void SetHighScore(int highScore)
     {
         PlayerPrefs.SetInt("HighScore", highScore);
     }
@@ -221,78 +346,7 @@ public class SpaceshipController : MonoBehaviour
         }
 
         gameOverUI.Show(newHighScore);
-        float GameOverDuration = 0.5f;
-        yield return new WaitForSeconds(GameOverDuration);
-    }
-
-    private void QuickTurn()
-    {
-        transform.up = -transform.up;   // Flip instantly 180 degrees around Z
-        SquashStretch(-transform.up, false);
-    }
-
-    private void SquashStretch(Vector2 direction, bool isSideways)
-    {
-        // squash in the direction of movement
-        if (isSideways)
-        {
-            // Sidestep dash: squash perpendicular to movement
-            transform.localScale = new Vector3(baseScale.x * (1f - squashAmount), baseScale.y * (1f + squashAmount), baseScale.z);
-        }
-        else
-        {
-            // Flip/back dash: squash along forward/backward
-            transform.localScale = new Vector3(baseScale.x * (1f + squashAmount), baseScale.y * (1f - squashAmount), baseScale.z);
-        }
-    }
-
-    private void HandleSquash()
-    {
-        // smoothly return to normal scale
-        transform.localScale = Vector3.Lerp(transform.localScale, baseScale, Time.deltaTime * squashSpeed);
-    }
-
-    private void HandleFX()
-    {
-        if (!thrustFX)
-            return;
-
-        var emission = thrustFX.emission;
-        bool thrusting = movementInput.y > 0.1f;
-        AudioManagerController.Instance.PlayThruster(thrusting);
-
-        if (thrusting)
-        {
-            emission.rateOverTime = Mathf.Lerp(0, 30f, movementInput.y);
-
-            if (!thrustFX.isPlaying)
-            {
-                thrustFX.Play();
-            }
-        }
-        else
-        {
-            emission.rateOverTime = 0;
-
-            if (thrustFX.isPlaying)
-            {
-                thrustFX.Stop(true, ParticleSystemStopBehavior.StopEmitting);
-            } 
-        }
-    }
-
-    public float GetVelocity()
-    {
-        float velocity = playerShipRB.linearVelocity.magnitude;
-        return Mathf.InverseLerp(0f, maxVelocity, velocity);
-    }
-
-    private void HandleSpeedStretch()
-    {
-        float velocity = GetVelocity();
-
-        Vector3 stretchedScale = new Vector3(baseScale.x * (1f - velocityStretchX * velocity), baseScale.y * (1f + velocityStretchY * velocity), baseScale.z);
-        transform.localScale = Vector3.Lerp(transform.localScale, stretchedScale, Time.deltaTime * velocityStretchLerp);
+        yield return null;
     }
 
     private void HandleComboTimer()
@@ -300,14 +354,5 @@ public class SpaceshipController : MonoBehaviour
         comboTimer -= Time.deltaTime;
         if (comboTimer <= 0)
             combo = 0;
-    }
-
-    private void UpdateShipDamageVisual()
-    {
-        float healthPercentage = 1f - (healthCurrent / healthMax);
-        // t goes 0 (full health) to 1 (dead)
-
-        Color shipColour = Color.Lerp(Color.white, Color.red, healthPercentage * 0.8f);
-        shipRenderer.color = shipColour;
     }
 }

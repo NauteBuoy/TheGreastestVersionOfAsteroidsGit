@@ -45,8 +45,12 @@ public class AsteroidController : MonoBehaviour
         rbAsteroid = GetComponent<Rigidbody2D>();
         rbAsteroid.AddForce(Random.insideUnitCircle * asteroidVelocity, ForceMode2D.Impulse); //random initial force
         asteroidRotationSpeed = Random.Range(-asteroidVelocity, asteroidVelocity); //random rotation speed
-        playerShip = SpaceshipController.playerInstance;
-        cameraShake = Camera.main.GetComponent<CameraController>();
+        playerShip = SpaceshipController.playerShipInstance;
+
+        if (!cameraShake)
+        {
+            cameraShake = Object.FindAnyObjectByType<CameraController>();
+        }
     }
 
     void Update()

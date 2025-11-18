@@ -11,7 +11,6 @@ public class ScreenWrapController : MonoBehaviour
     private Vector3 lastPos;
 
 
-
     void Start()
     {
         cam = Camera.main;
@@ -52,6 +51,5 @@ public class ScreenWrapController : MonoBehaviour
         }
 
         lastPos = pos;
-
     }
 }

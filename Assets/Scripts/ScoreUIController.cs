@@ -6,7 +6,7 @@ public class ScoreUIController : MonoBehaviour
     [Header("Score Reference Settings")]
     public static ScoreUIController Instance;
     public TMP_Text scoreText;
-    Vector3 baseScale;
+
 
     [Header("Animation Settings")]
     public float animaitonScale = 1.35f;     // how big the pop is
@@ -17,7 +17,6 @@ public class ScoreUIController : MonoBehaviour
     {
         Instance = this;
         AudioManagerController.Instance.PlayMusic(AudioManagerController.Instance.gameMusic, AudioManagerController.Instance.gameMusicVolume);
-        baseScale = transform.localScale;
     }
 
     void Update()
