@@ -5,6 +5,14 @@ using UnityEngine.VFX;
 
 public class SpaceshipController : MonoBehaviour
 {
+    public enum HeatState
+    {
+        Cool,
+        Warm,
+        Hot,
+        Critical
+    }
+
     [Header("Ship Reference Settings")]
     public static SpaceshipController playerShipInstance; //reference to THIS player ship
     public Transform shipVisual; //reference to player ship sprite transform
@@ -12,6 +20,19 @@ public class SpaceshipController : MonoBehaviour
     private Rigidbody2D playerShipRB; //reference to player ship Rigidbody2D
     private Vector2 playerMovementInput; //player movement input vector
     private Vector3 shipBaseScale; //original scale of the ship
+
+
+    [Header("Heat State Settings")]
+    public HeatState currentHeatState = HeatState.Cool; //current heat state
+    float stateBlendDuration = 6f; //duration for stat blending
+    public float stateSwitchCooldown = 0.15f;
+    private float stateSwitchTimer = 0f;
+    float thrustMultiplier = 1f;
+    float velocityMultiplier = 1f;
+    float torqueMultiplier = 1f;
+    float targetThrustMultiplier = 1f;
+    float targetVelocityMultiplier = 1f;
+    float targetTorqueMultiplier = 1f;
 
 
     [Header("Heat Settings")]
@@ -48,45 +69,35 @@ public class SpaceshipController : MonoBehaviour
 
 
     [Header("FX Settings")]
+    public ParticleSystem thrustFX; // thrust particle system
     public GameObject explosionFX; // explosion effect prefab
     public GameObject collsionFX; // collision effect prefab
-    public ParticleSystem thrustFX; // thrust particle system
     public ScreenFlashController screenFlash; // screen flash controller
-    public GameOverUIController gameOverUI; // game over UI controller
     public CameraController cameraShake; // camera shake controller
+    public GameOverUIController gameOverUI; // game over UI controller
     public float screenShakeDamageMultiplier = 2f; // multiplier for screen shake intensity
     public float visualRotationLag = 10f; // how quickly the visual lags behind rotation
+
 
     void Start()
     {
         playerShipInstance = this;
         playerShipRB = GetComponent<Rigidbody2D>();
-        playerShipRB.gravityScale = 0;
-
         shipBaseScale = transform.localScale;
         baseMaxVelocity = maxVelocity;
         baseThrustForce = thrustForce;
 
-        if (!cameraShake)
-        {
-            cameraShake = Object.FindAnyObjectByType<CameraController>();
-        }
-        if (!screenFlash)
-        {
-            screenFlash = Object.FindAnyObjectByType<ScreenFlashController>();
-        }
-        if (!gameOverUI)
-        {
-            gameOverUI = Object.FindAnyObjectByType<GameOverUIController>();
-        }  
+        cameraShake = Object.FindAnyObjectByType<CameraController>();
+        screenFlash = Object.FindAnyObjectByType<ScreenFlashController>();
+        gameOverUI = Object.FindAnyObjectByType<GameOverUIController>();
     }
 
     void Update()
     {
         HandleMovementInput();
         HandleHeat();
+        HandleVFX();
         HandleDiscarge();
-        HandleFX();
         HandleVisualSquashStretch();
         HandleComboTimer();
     }
@@ -107,39 +118,6 @@ public class SpaceshipController : MonoBehaviour
         playerMovementInput.y = Input.GetAxisRaw("Vertical"); //thrust
     }
 
-    void HandleHeat()
-    {
-        bool thrusting = playerMovementInput.y > 0.1f;
-        // Handle heat generation and cooling
-        if (thrusting)
-        {
-            currentHeat = Mathf.Min(maxHeat, currentHeat + heatRateThrust * Time.deltaTime);
-        }
-        else
-        {
-            currentHeat = Mathf.Max(0f, currentHeat - passiveCoolRate * Time.deltaTime);
-        }
-        // clamp safety
-        currentHeat = Mathf.Clamp(currentHeat, 0f, maxHeat);
-        // optional: update ship glow here
-        UpdateHeatVisuals();
-
-        if (currentHeat >= maxHeat)
-        {
-            Explode();
-        }
-    }
-
-    public void AddHeat(float amount)
-    {
-        currentHeat = Mathf.Clamp(currentHeat + amount, 0f, maxHeat);
-    }
-
-    public float GetHeatNorm()
-    {
-        return Mathf.Clamp01(currentHeat / maxHeat);
-    }
-
     void HandleMovementPhysics()
     {
         ApplyThrust(playerMovementInput.y);
@@ -150,25 +128,120 @@ public class SpaceshipController : MonoBehaviour
     private void ApplyThrust(float thrust)
     {
         float heatBoost = 1f + (GetHeatNorm() * thrustForceHeatFactor);
-        float heatedThrust = baseThrustForce * heatBoost;
+        float heatedThrust = baseThrustForce * heatBoost * thrustMultiplier;
 
         playerShipRB.AddForce(transform.up * thrust * heatedThrust * Time.fixedDeltaTime, ForceMode2D.Force);
     }
 
     private void ApplyTorque(float rotation)
     {
-        float torque = rotation * rotationTorque * Time.fixedDeltaTime;
+        float torque = rotation * rotationTorque * torqueMultiplier * Time.fixedDeltaTime;
         playerShipRB.AddTorque(-torque);
     }
 
     private void ClampVelocity()
     {
         float heatBoost = 1f + (GetHeatNorm() * maxVelocityHeatFactor);
-        float maxVelocity = baseMaxVelocity * heatBoost;
+        float maxVelocity = baseMaxVelocity * heatBoost * velocityMultiplier;
 
         if (playerShipRB.linearVelocity.magnitude > maxVelocity)
         {
             playerShipRB.linearVelocity = playerShipRB.linearVelocity.normalized * maxVelocity;
+        }
+    }
+
+    void HandleHeat()
+    {
+        bool thrusting = playerMovementInput.y > 0.1f;
+
+        if (thrusting)
+        {
+            currentHeat = Mathf.Min(maxHeat, currentHeat + heatRateThrust * Time.deltaTime);
+        }
+        else
+        {
+            currentHeat = Mathf.Max(0f, currentHeat - passiveCoolRate * Time.deltaTime);
+        }
+
+        currentHeat = Mathf.Clamp(currentHeat, 0f, maxHeat);
+
+        HandleHeatState();
+        BlendStateMultipliers();
+        UpdateHeatVisuals();
+
+        //if (currentHeat >= maxHeat)
+        //{
+        //    //OVERDRIVE MODE TRIGGERED
+        //}
+    }
+
+    public float GetHeatNorm()
+    {
+        return Mathf.Clamp01(currentHeat / maxHeat);
+    }
+
+    public void HandleHeatState()
+    {
+        stateSwitchTimer -= Time.deltaTime;
+        if (stateSwitchTimer > 0)
+            return;
+
+        float heatNorm = GetHeatNorm();
+        HeatState newState;
+
+        if (heatNorm < 0.2f)
+            newState = HeatState.Cool;
+        else if (heatNorm < 0.5f)
+            newState = HeatState.Warm;
+        else if (heatNorm < 0.85f)
+            newState = HeatState.Hot;
+        else
+            newState = HeatState.Critical;
+
+        if (newState != currentHeatState)
+        {
+            currentHeatState = newState;
+            stateSwitchTimer = stateSwitchCooldown;
+            OnHeatStateChanged(newState);
+        }
+    }
+
+    public void BlendStateMultipliers()
+    {
+        thrustMultiplier = Mathf.Lerp(thrustMultiplier, targetThrustMultiplier, Time.deltaTime * stateBlendDuration);
+        velocityMultiplier = Mathf.Lerp(velocityMultiplier, targetVelocityMultiplier, Time.deltaTime * stateBlendDuration);
+        torqueMultiplier = Mathf.Lerp(torqueMultiplier, targetTorqueMultiplier, Time.deltaTime * stateBlendDuration);
+    }
+
+    public void OnHeatStateChanged(HeatState newState)
+    {
+        Debug.Log("Heat State → " + newState);
+
+        switch (newState)
+        {
+            case HeatState.Cool:
+                targetThrustMultiplier = 0.8f;
+                targetVelocityMultiplier = 0.8f;
+                targetTorqueMultiplier = 1.1f;
+                break;
+
+            case HeatState.Warm:
+                targetThrustMultiplier = 1f;
+                targetVelocityMultiplier = 1f;
+                targetTorqueMultiplier = 1f;
+                break;
+
+            case HeatState.Hot:
+                targetThrustMultiplier = 1.25f;
+                targetVelocityMultiplier = 1.25f;
+                targetTorqueMultiplier = 0.85f;
+                break;
+
+            case HeatState.Critical:
+                targetThrustMultiplier = 1.45f;
+                targetVelocityMultiplier = 1.55f;
+                targetTorqueMultiplier = 0.55f;
+                break;
         }
     }
 
@@ -216,7 +289,7 @@ public class SpaceshipController : MonoBehaviour
         transform.localScale = new Vector3(shipBaseScale.x * (1f + squashAmount), shipBaseScale.y * (1f - squashAmount), shipBaseScale.z);
     }
 
-    private void HandleFX()
+    private void HandleVFX()
     {
         if (!thrustFX)
             return;
@@ -258,9 +331,7 @@ public class SpaceshipController : MonoBehaviour
     void HandleVisualSquashStretch()
     {
         float velocityNorm = GetVelocityNorm();
-
         Vector3 targetVelocityScale = new Vector3(shipBaseScale.x * (1f - velocityStretchX * velocityNorm), shipBaseScale.y * (1f + velocityStretchY * velocityNorm), shipBaseScale.z);
-
         transform.localScale = Vector3.Lerp(transform.localScale, targetVelocityScale, Time.deltaTime * squashStretchReturnSpeed);
     }
 
@@ -288,6 +359,11 @@ public class SpaceshipController : MonoBehaviour
         {
             shipRenderer.color = shipHeatColour;
         }
+    }
+
+    public void AddHeat(float amount)
+    {
+        currentHeat = Mathf.Clamp(currentHeat + amount, 0f, maxHeat);
     }
 
     public void TakeDamage(float damage)

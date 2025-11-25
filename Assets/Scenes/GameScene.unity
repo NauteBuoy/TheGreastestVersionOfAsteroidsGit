@@ -1507,6 +1507,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 109561785298019068, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
+      propertyPath: thrustForceHeatFactor
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 2356628942725642436, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
