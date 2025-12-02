@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1020212088024319759}
   - component: {fileID: 8272412739177956638}
-  - component: {fileID: 1731118422074954655}
   - component: {fileID: 8472709953720751227}
   - component: {fileID: 5636390060554177426}
   - component: {fileID: 8354512683435766220}
@@ -66,32 +65,6 @@ MonoBehaviour:
   explosionDistance: 1
   explosionForce: 1
   scoreValue: 50
---- !u!114 &1731118422074954655
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 562265514404860698}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5fc4e55b480881a4bb4b7edd07332e28, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  currentState: 0
-  isInGravityRange: 0
-  isCapturing: 0
-  isTransitioning: 0
-  orbitRotationSpeed: 60
-  orbitFollowSpeed: 12
-  stateTransitionDuration: 0.6
-  trailFollowSpeed: 12
-  trailSpread: 0.6
-  trailLag: 0.6
-  captureProgress: 0
-  captureDuration: 3
-  captureGravityFactor: 0.98
-  releaseVelocityFactor: 1.02
 --- !u!50 &8472709953720751227
 Rigidbody2D:
   serializedVersion: 5
@@ -164,7 +137,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 5419148439009658177, guid: 1f9c9ac7c213f354e91a5defe7787316, type: 3}
-  m_Color: {r: 0.882353, g: 0.882353, b: 0.882353, a: 1}
+  m_Color: {r: 0.882353, g: 0.882353, b: 0.882353, a: 0.78431374}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

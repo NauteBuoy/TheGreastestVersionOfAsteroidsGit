@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2608918522257297089}
   - component: {fileID: 3202775904297709580}
-  - component: {fileID: -7634318055526125444}
   - component: {fileID: 8097328283062347288}
   - component: {fileID: 359816365230548491}
   - component: {fileID: 7119575303057452323}
@@ -66,32 +65,6 @@ MonoBehaviour:
   explosionDistance: 1
   explosionForce: 1
   scoreValue: 100
---- !u!114 &-7634318055526125444
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8001523080420548711}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5fc4e55b480881a4bb4b7edd07332e28, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  currentState: 0
-  isInGravityRange: 0
-  isCapturing: 0
-  isTransitioning: 0
-  orbitRotationSpeed: 60
-  orbitFollowSpeed: 12
-  stateTransitionDuration: 0.6
-  trailFollowSpeed: 12
-  trailSpread: 0.6
-  trailLag: 0.6
-  captureProgress: 0
-  captureDuration: 3
-  captureGravityFactor: 0.98
-  releaseVelocityFactor: 1.02
 --- !u!50 &8097328283062347288
 Rigidbody2D:
   serializedVersion: 5
