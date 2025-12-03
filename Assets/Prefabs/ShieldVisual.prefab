@@ -96,9 +96,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6864668404201084528}
-  - component: {fileID: 344516244922211350}
   - component: {fileID: 7145654101205396735}
+  - component: {fileID: 344516244922211350}
   - component: {fileID: 1533448995363883748}
+  - component: {fileID: 1589674840909512390}
   m_Layer: 0
   m_Name: ShieldVisual
   m_TagString: Untagged
@@ -122,6 +123,27 @@ Transform:
   - {fileID: 6199744084377182562}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7145654101205396735
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4337696907611821945}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a454eaf803e5be4998b58632ab71682, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerShip: {fileID: 0}
+  followTransform: {fileID: 0}
+  shieldVisual: {fileID: 0}
+  shieldCollider: {fileID: 0}
+  followSpeed: 30
+  smoothDuration: 0.03
+  shieldColliderRadius: 1
+  collisionImunityDuration: 0.5
+  isImmune: 0
 --- !u!212 &344516244922211350
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -177,21 +199,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &7145654101205396735
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4337696907611821945}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9a454eaf803e5be4998b58632ab71682, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  followTransform: {fileID: 2356628942725642436, guid: 4d8b1c36c40dcc246aedcc76065a00ca, type: 3}
-  followSpeed: 30
-  smoothDuration: 0.03
 --- !u!58 &1533448995363883748
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -227,7 +234,34 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 0.17
+  m_Radius: 0.15
+--- !u!50 &1589674840909512390
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4337696907611821945}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!1 &4424352818964883725
 GameObject:
   m_ObjectHideFlags: 0
@@ -361,9 +395,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e31111e262270247861ba53e75de13e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  orbitCentreTransform: {fileID: 6864668404201084528}
+  orbitCentre: {fileID: 6864668404201084528}
   shieldIndicator1: {fileID: 7315245002557258386}
   shieldIndicator2: {fileID: 1248998701604891836}
   orbitRadius: 0.2
   orbitSpeed: 90
+  smoothDuration: 0.06
   shieldCount: 2

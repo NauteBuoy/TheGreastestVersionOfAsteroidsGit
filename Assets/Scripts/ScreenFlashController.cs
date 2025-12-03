@@ -8,9 +8,6 @@ public class ScreenFlashController : MonoBehaviour
     private Image flashImage;
     private Color flashColor;
 
-    public SpaceshipController spaceship;
-
-
     void Start()
     {
         flashImage = GetComponent<Image>();

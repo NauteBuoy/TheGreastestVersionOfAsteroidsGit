@@ -121,10 +121,16 @@ public class SpaceshipController : MonoBehaviour
     public float visualRotationLag = 10f; // how quickly the visual lags behind rotation
 
 
+    private void Awake()
+    {
+        if (!playerShipInstance) 
+        {
+            playerShipInstance = this;
+        }
+    }
+
     void Start()
     {
-        playerShipInstance = this;
-
         playerShipRB = GetComponent<Rigidbody2D>();
         shipBaseScale = transform.localScale;
         baseMaxVel = maxVelocity;
@@ -155,8 +161,6 @@ public class SpaceshipController : MonoBehaviour
     {
         HandleVisualLagRotation();
     }
-
-
 
     private void HandleMovementInput()
     {
@@ -445,33 +449,31 @@ public class SpaceshipController : MonoBehaviour
         shipVisual.rotation = Quaternion.Slerp(shipVisual.rotation, targetRotation, Time.deltaTime * visualRotationLag);
     }
 
-   
-
-    
 
 
     public void TakeDamage(float damage)
     {
-        if (currentShields > 0)
-        {
-            currentShields--;
-            shieldUI.shieldCount = currentShields;
-
-            if (currentShields > 0)
-            {
-                TriggerShieldHit();
-            }
-            else
-            {
-                TriggerShieldBreak();
-            }
-
-            StartCoroutine(RechargeShieldRoutine());
-            return;
-        }
-
         //AddHeat(damage);
         //Explode();
+    }
+
+
+
+
+    public void ShieldDamage()
+    {
+        currentShields--;
+        shieldUI.shieldCount = currentShields;
+
+        if (currentShields > 0)
+        {
+            TriggerShieldHit();
+        }
+        else
+        {
+            TriggerShieldBreak();
+            StartCoroutine(RechargeShieldRoutine());
+        }
     }
 
     private void HandleShieldVFX()
@@ -490,7 +492,7 @@ public class SpaceshipController : MonoBehaviour
         shieldVisual.transform.localScale = Vector3.Lerp(shieldVisual.transform.localScale, Vector3.one * shieldTargetScale, Time.deltaTime * squashStretchReturnSpeed);
     }
 
-    private void TriggerShieldHit()
+    public void TriggerShieldHit()
     {
         AudioManagerController.Instance.PlaySFX(AudioManagerController.Instance.shipCollisionSFX, AudioManagerController.Instance.normalCollisionVolume);
         Instantiate(collsionFX, transform.position, Quaternion.identity);

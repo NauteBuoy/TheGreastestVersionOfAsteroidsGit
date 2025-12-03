@@ -130,22 +130,22 @@ public class DischargeController : MonoBehaviour
         Time.timeScale = 1f;
     }
 
-    void OnDrawGizmos()
-    {
-        if (!SpaceshipController.playerShipInstance) 
-            return;
+    //void OnDrawGizmos()
+    //{
+    //    if (!SpaceshipController.playerShipInstance) 
+    //        return;
 
-        float heatNorm = SpaceshipController.playerShipInstance.GetHeatNorm();
+    //    float heatNorm = SpaceshipController.playerShipInstance.GetHeatNorm();
 
-        float scaledRadius = Mathf.Lerp(0.5f, 3f, heatNorm);
-        Gizmos.color = Color.white; //gravity capture zone
-        Gizmos.DrawWireSphere(transform.position, scaledRadius);
+    //    float scaledRadius = Mathf.Lerp(0.5f, 3f, heatNorm);
+    //    Gizmos.color = Color.white; //gravity capture zone
+    //    Gizmos.DrawWireSphere(transform.position, scaledRadius);
 
-        float scaledRange = Mathf.Lerp(baseDischargeRange, maxDischargeRange, heatNorm);
-        Gizmos.color = Color.red;
-        var playerShipInstance = SpaceshipController.playerShipInstance;
-        Vector2 directionToRaycast = SpaceshipController.playerShipInstance.transform.up;
-        Vector2 raycastOriginPos = (Vector2)playerShipInstance.transform.position - directionToRaycast * playerShipInstance.dischargeOffset;
-        Gizmos.DrawLine(raycastOriginPos, raycastOriginPos + directionToRaycast * scaledRange);
-    }
+    //    float scaledRange = Mathf.Lerp(baseDischargeRange, maxDischargeRange, heatNorm);
+    //    Gizmos.color = Color.red;
+    //    var playerShipInstance = SpaceshipController.playerShipInstance;
+    //    Vector2 directionToRaycast = SpaceshipController.playerShipInstance.transform.up;
+    //    Vector2 raycastOriginPos = (Vector2)playerShipInstance.transform.position - directionToRaycast * playerShipInstance.dischargeOffset;
+    //    Gizmos.DrawLine(raycastOriginPos, raycastOriginPos + directionToRaycast * scaledRange);
+    //}
 }

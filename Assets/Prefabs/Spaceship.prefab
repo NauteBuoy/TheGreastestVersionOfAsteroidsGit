@@ -116,7 +116,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -0.1}
-  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
+  m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 2356628942725642436}
@@ -491,7 +491,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shipVisual: {fileID: 5314644484728716537}
   shipRenderer: {fileID: 1662932528079986421}
-  shieldVisual: {fileID: 1662932528079986421}
+  shieldVisual: {fileID: 0}
   shieldBaseScale: 1.5
   shieldHitScale: 2.5
   maxShields: 2
@@ -533,7 +533,7 @@ MonoBehaviour:
   dischargeOffset: 0.2
   squashAmount: 0.6
   squashStretchDuration: 6
-  squashReturnSpeed: 12
+  squashStretchReturnSpeed: 12
   velocityStretchX: 0.25
   velocityStretchY: 0.45
   score: 0
@@ -796,11 +796,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e31111e262270247861ba53e75de13e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  orbitCentreTransform: {fileID: 0}
+  orbitCentre: {fileID: 0}
   shieldIndicator1: {fileID: 3822356458182670253}
   shieldIndicator2: {fileID: 6279397695916943987}
   orbitRadius: 0.2
   orbitSpeed: 90
+  smoothDuration: 0.06
   shieldCount: 2
 --- !u!1001 &8749523110127506683
 PrefabInstance:

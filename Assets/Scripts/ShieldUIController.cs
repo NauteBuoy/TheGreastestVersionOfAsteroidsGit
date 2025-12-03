@@ -8,28 +8,26 @@ public class ShieldUIController : MonoBehaviour
 
     public float orbitRadius = 1.1f;
     public float orbitSpeed = 180f;
+    public float smoothDuration = 0.06f;
 
     public int shieldCount = 2;
 
     float orbitAngle;
-
-    Vector3 prevCenterPos;
     Vector3 orbitCentreVel;
 
 
 
     void Start()
     {
-        
-    }
 
+    }
 
     void Update()
     {
         if (!orbitCentre)
             return;
 
-        Vector3 center = Vector3.SmoothDamp(prevCenterPos, orbitCentre.position, ref orbitCentreVel, 0.06f);
+        Vector3 center = Vector3.SmoothDamp(transform.position, orbitCentre.position, ref orbitCentreVel, smoothDuration);
 
         // Orbit positions
         orbitAngle += orbitSpeed * Time.deltaTime;
