@@ -1,93 +1,103 @@
 using System.Collections;
 using UnityEditor.Rendering.LookDev;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class AsteroidController : MonoBehaviour
 {
-    [Header("Asteroid Settings")]
-    public float asteroidVelocity = 3f; //initial velocity of asteroid
+    [Header("Asteroid Spawn Settings")]
+    public int asteroidSpawnValue = 1; //value of asteroid for spawning purposes
 
-    [Header("Asteroid Health Settings")]
-    public float healthMax = 5f; //maximum health of asteroid
-    private float healthCurrent; //current health of asteroid
 
-    [Header("Asteroid Damage Settings")]
-    public GameObject collsionFX; // collision effect prefab
+    [Header("Asteroid References")]
+    private Rigidbody2D rbAsteroid; //reference to asteroid rigidbody
+    private SpaceshipController playerShip; //reference to player ship
+
+
+    [Header("Movement Settings")]
+    public float rotationSkew = 3f; //initial velocity of asteroid
+    private float rotationSpeed; //rotation speed of asteroid
+
+
+    [Header("Hit Point Settings")]
+    public float hitPointMax = 5f; //maximum health of asteroid
+    private float hitPointCurrent; //current health of asteroid
+
+
+    [Header("Damage Settings")]
     public float collisionDamage = 1f; //damage dealt to player ship on collision
+    public GameObject collsionFX; // collision effect prefab
+
+
+    [Header("Screen Shake Settings")]
     public CameraController cameraShake; // camera shake controller
     public float screenShakeMultiplier = 1f; // multiplier for screen shake intensity
 
-    [Header("Asteroid Spawn Settings")]
-    public int asteroidValue = 3; //value of asteroid for spawning purposes
 
-    [Header("Asteroid Chunk Settings")]
+    [Header("Collision Settings")]
+    public float collisionHitTime;
+    public float nextCollisionHitDuration = 0.1f;
+
+
+    [Header("Chunk Settings")]
     public GameObject[] asteroidChunks; //array of asteroid chunk prefabs
-
-    [Header("Chunk Explosion Settings")]
     public GameObject explosionFX; //explosion effect prefab
     public int chunkMin = 0; //minimum number of chunks to spawn
     public int chunkMax = 5; //maximum number of chunks to spawn
     public float explosionDistance = 0.5f; //maximum distance chunks can spawn from asteroid center
     public float explosionForce = 10f; //force applied to chunks on spawn
 
+
     [Header("Highscore Settings")]
     public int scoreValue = 10; //score value awarded to player on asteroid destruction
-
-    [Header("Private Settings")]
-    private Rigidbody2D rbAsteroid; //reference to asteroid rigidbody
-    private float asteroidRotationSpeed; //rotation speed of asteroid
-    private SpaceshipController playerShip; //reference to player ship
 
 
     void Start()
     {
-        healthCurrent = healthMax;
-        rbAsteroid = GetComponent<Rigidbody2D>();
-        rbAsteroid.AddForce(Random.insideUnitCircle * asteroidVelocity, ForceMode2D.Impulse); //random initial force
-        asteroidRotationSpeed = Random.Range(-asteroidVelocity, asteroidVelocity); //random rotation speed
         playerShip = SpaceshipController.playerShipInstance;
-
-        if (!cameraShake)
-        {
-            cameraShake = Object.FindAnyObjectByType<CameraController>();
-        }
+        cameraShake = Object.FindAnyObjectByType<CameraController>();
+        rbAsteroid = GetComponent<Rigidbody2D>();
+        hitPointCurrent = hitPointMax;
+        rotationSpeed = Random.Range(-rotationSkew, rotationSkew); 
     }
 
     void Update()
     {
-        transform.Rotate(Vector3.forward * asteroidRotationSpeed * Time.deltaTime); //rotate asteroid
+        transform.Rotate(Vector3.forward * rotationSpeed * Time.deltaTime); 
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        SpaceshipController playerShip = collision.gameObject.GetComponent<SpaceshipController>();
-        if (playerShip)
+        if (!playerShip)
+            return;
+
+        else if (collision.gameObject.GetComponent<SpaceshipController>())
         {
-            playerShip.TakeDamage(collisionDamage); //damage player ship
+            playerShip.TakeDamage(collisionDamage);
         }
         else if (collision.gameObject.GetComponent<AsteroidController>())
         {
-            // play SFX
-            AudioManagerController.Instance.PlaySFX(AudioManagerController.Instance.asteroidCollisionSFX, AudioManagerController.Instance.asteroidCollisionVolume);
+            if (Time.time - collisionHitTime < nextCollisionHitDuration)
+                return;
 
-            // spawn dust particles
-            if (cameraShake)  // reuse or add a dedicated hit particle
-            {
-                cameraShake.StartSceenShake(screenShakeMultiplier * 0.5f);
-            }
+            AudioManagerController.Instance.PlaySFX(AudioManagerController.Instance.collisionSFX, AudioManagerController.Instance.collisionVolume);
+            Instantiate(collsionFX, transform.position, transform.rotation);
+            cameraShake.StartSceenShake(screenShakeMultiplier * 0.6f);
+            
         }
     }
 
+
     public void TakeDamage(float damage)
     {
-        AudioManagerController.Instance.PlaySFX(AudioManagerController.Instance.shipCollisionSFX, AudioManagerController.Instance.normalCollisionVolume);
+        AudioManagerController.Instance.PlaySFX(AudioManagerController.Instance.collisionSFX, AudioManagerController.Instance.normalCollisionVolume);
 
-        healthCurrent -= damage; //reduce health
+        hitPointCurrent -= damage; 
         cameraShake.StartSceenShake(screenShakeMultiplier);
 
-        if (healthCurrent <= 0)
+        if (hitPointCurrent <= 0)
         {
-            Explode(); //explode asteroid
+            Explode();
         }
     }
 
@@ -95,8 +105,8 @@ public class AsteroidController : MonoBehaviour
     {
         if (playerShip)
         {
-            playerShip.score += scoreValue; //increase player score  
-            ScoreUIController.Instance.UpdateScore(playerShip.score);
+            playerShip.score += scoreValue;  
+            ScoreUIController.scoreUIInstance.UpdateScore(playerShip.score);
         }
 
         int numChunks = Random.Range(chunkMin, chunkMax + 1);
@@ -105,7 +115,7 @@ public class AsteroidController : MonoBehaviour
         {
             for (int i = 0; i < numChunks; i++)
             {
-                CreateAsteroidChunk(); //create asteroid chunks
+                CreateAsteroidChunk();
             }
         }
 

@@ -16,10 +16,9 @@ public class AudioManagerController : MonoBehaviour
     public AudioSource sfxAudioSource;
     public AudioClip bulletSFX;
     public AudioClip explosionSFX;
-    public AudioClip shipCollisionSFX;
+    public AudioClip collisionSFX;
     public AudioClip shipDeathSFX;
-    public AudioClip asteroidCollisionSFX;
-    public float asteroidCollisionVolume = 0.3f; 
+    public float collisionVolume = 0.3f; 
     public float normalCollisionVolume = 1f;   
 
     [Header("Thruster Settings")]

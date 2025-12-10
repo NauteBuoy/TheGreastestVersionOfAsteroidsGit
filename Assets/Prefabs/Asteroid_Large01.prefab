@@ -31,8 +31,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 2}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 2.4, y: 2.4, z: 2.4}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -48,23 +48,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 799fbcc7b914ad1468a539aacedd5377, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  asteroidVelocity: 1
-  healthMax: 3
+  asteroidSpawnValue: 3
+  rotationSkew: 10
+  hitPointMax: 3
+  collisionDamage: 3
   collsionFX: {fileID: 5999593711267985948, guid: 655eed02206ea33438b6128524cb6bcd, type: 3}
-  collisionDamage: 10
   cameraShake: {fileID: 0}
-  screenShakeMultiplier: 1
-  asteroidValue: 3
+  screenShakeMultiplier: 0.8
+  collisionHitTime: 0
+  nextCollisionHitDuration: 0.2
   asteroidChunks:
   - {fileID: 4082472932018963504, guid: b64ef9f378cbcb2408714bdf2d25a51e, type: 3}
   - {fileID: 2428923140451405553, guid: a3e4db3c4b9ce584e89580314747a0c1, type: 3}
   - {fileID: 562265514404860698, guid: 8d7be979717efce4893b519e20775826, type: 3}
   explosionFX: {fileID: 5999593711267985948, guid: e98c9b661b7d9f245aff5d8f894778fe, type: 3}
-  chunkMin: 1
-  chunkMax: 5
-  explosionDistance: 1
-  explosionForce: 1
-  scoreValue: 100
+  chunkMin: 2
+  chunkMax: 4
+  explosionDistance: 1.2
+  explosionForce: 1.2
+  scoreValue: 80
 --- !u!50 &8097328283062347288
 Rigidbody2D:
   serializedVersion: 5
@@ -77,11 +79,11 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 5
+  m_Mass: 8
   m_LinearDamping: 0
   m_AngularDamping: 0
   m_GravityScale: 0
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 2a0fbf2acca41b54c85591474ab2d376, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -193,11 +195,11 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: 0.22239059, y: 0.22325794}
-      - {x: -0.14566316, y: 0.3112273}
-      - {x: -0.32102302, y: -0.03251119}
-      - {x: 0.02546287, y: -0.31111658}
-      - {x: 0.32626814, y: -0.15392072}
+    - - {x: 0.2408234, y: 0.2505669}
+      - {x: -0.15593313, y: 0.33914402}
+      - {x: -0.35324496, y: -0.03853052}
+      - {x: 0.027391676, y: -0.34776753}
+      - {x: 0.35286382, y: -0.16460195}
   m_UseDelaunayMesh: 0
 --- !u!114 &-8944843426103776724
 MonoBehaviour:

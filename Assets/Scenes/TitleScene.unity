@@ -460,11 +460,13 @@ MonoBehaviour:
   - {fileID: 2825977830538826595, guid: b2e39c1f158d78142b84a90b9829ab13, type: 3}
   - {fileID: 3536935613360764983, guid: 0806e5ea718dc3b46bb89a28f303beb0, type: 3}
   - {fileID: 3958864720268528133, guid: 471e7f3a4bc8a30409b1259c07b2d6a9, type: 3}
-  spawnInterval: 0.5
-  intitialForce: 50
-  spawnThreshold: 25
+  spawnInterval: 1
+  intitialForce: 200
+  spawnValueThreshold: 20
   spawnOffset: 1.5
-  directionSkew: 50
+  directionSkew: 20
+  cameraShake: {fileID: 0}
+  screenShakeSpawnMultiplier: 0.05
 --- !u!1 &352492992
 GameObject:
   m_ObjectHideFlags: 0
@@ -1506,7 +1508,7 @@ PrefabInstance:
     - target: {fileID: 6231258660799364976, guid: e3a5bd20f6339024f8105208fa01f42b, type: 3}
       propertyPath: asteroidCollisionSFX
       value: 
-      objectReference: {fileID: 8300000, guid: 1da0369a9bf748d40a28066ed7629a42, type: 3}
+      objectReference: {fileID: 8300000, guid: edab1d7937fe1854eaeaac62043e49b9, type: 3}
     - target: {fileID: 6231258660799364976, guid: e3a5bd20f6339024f8105208fa01f42b, type: 3}
       propertyPath: normalCollisionVolume
       value: 3

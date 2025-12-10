@@ -100,6 +100,7 @@ GameObject:
   - component: {fileID: 344516244922211350}
   - component: {fileID: 1533448995363883748}
   - component: {fileID: 1589674840909512390}
+  - component: {fileID: 880495006205582556}
   m_Layer: 0
   m_Name: ShieldVisual
   m_TagString: Untagged
@@ -139,11 +140,10 @@ MonoBehaviour:
   followTransform: {fileID: 0}
   shieldVisual: {fileID: 0}
   shieldCollider: {fileID: 0}
-  followSpeed: 30
-  smoothDuration: 0.03
-  shieldColliderRadius: 1
-  collisionImunityDuration: 0.5
+  imunityDuration: 0.2
   isImmune: 0
+  followSpeed: 30
+  smoothFollowDuration: 0.03
 --- !u!212 &344516244922211350
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -262,6 +262,19 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &880495006205582556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4337696907611821945}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19a78da32bbfe2146972f1cb60117933, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fadeInDuration: 1
 --- !u!1 &4424352818964883725
 GameObject:
   m_ObjectHideFlags: 0
@@ -395,10 +408,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e31111e262270247861ba53e75de13e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  orbitCentre: {fileID: 6864668404201084528}
+  playerShip: {fileID: 0}
+  followTransform: {fileID: 0}
   shieldIndicator1: {fileID: 7315245002557258386}
   shieldIndicator2: {fileID: 1248998701604891836}
   orbitRadius: 0.2
   orbitSpeed: 90
-  smoothDuration: 0.06
-  shieldCount: 2
+  smoothFollowDuration: 0.06

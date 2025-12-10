@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class BulletFadeController : MonoBehaviour
+public class ShieldFadeController : MonoBehaviour
 {
     public float lifeTime = 0.6f;
     public float fadeTime = 0.2f;

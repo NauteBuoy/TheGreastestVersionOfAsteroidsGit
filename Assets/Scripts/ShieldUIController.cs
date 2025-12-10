@@ -2,51 +2,63 @@ using UnityEngine;
 
 public class ShieldUIController : MonoBehaviour
 {
-    public Transform orbitCentre;
+    [Header("Reference Settings")]
+    public SpaceshipController playerShip;
+    public Transform followTransform;
     public Transform shieldIndicator1;
     public Transform shieldIndicator2;
 
+
+    [Header("Orbit/Follow Settings")]
     public float orbitRadius = 1.1f;
     public float orbitSpeed = 180f;
-    public float smoothDuration = 0.06f;
-
-    public int shieldCount = 2;
-
-    float orbitAngle;
-    Vector3 orbitCentreVel;
-
+    public float smoothFollowDuration = 0.06f;
+    public float orbitAngle;
+    Vector3 followCentreVel;
 
 
     void Start()
     {
-
+        playerShip = SpaceshipController.playerShipInstance;
+        followTransform = playerShip.transform;
     }
 
     void Update()
     {
-        if (!orbitCentre)
+        HandleShieldUIOrbit();
+        HandleShieldUIVisual();
+    }
+
+    public void HandleShieldUIOrbit()
+    {
+        if (!playerShip)
             return;
 
-        Vector3 center = Vector3.SmoothDamp(transform.position, orbitCentre.position, ref orbitCentreVel, smoothDuration);
+        Vector3 center = Vector3.SmoothDamp(transform.position, followTransform.position, ref followCentreVel, smoothFollowDuration);
 
         // Orbit positions
         orbitAngle += orbitSpeed * Time.deltaTime;
-        float rad = orbitAngle * Mathf.Deg2Rad;
+        float orbitRad = orbitAngle * Mathf.Deg2Rad;
 
-        // Only show dots equal to shields
-        shieldIndicator1.gameObject.SetActive(shieldCount >= 1);
-        shieldIndicator2.gameObject.SetActive(shieldCount >= 2);
-
-        if (shieldCount >= 1)
+        if (playerShip.currentShields >= 1)
         {
-            Vector3 orbitPos1 = center + new Vector3(Mathf.Cos(rad), Mathf.Sin(rad)) * orbitRadius;
-            shieldIndicator1.position = orbitPos1;
+            Vector3 shieldUIPos1 = center + new Vector3(Mathf.Cos(orbitRad), Mathf.Sin(orbitRad)) * orbitRadius;
+            shieldIndicator1.position = shieldUIPos1;
         }
 
-        if (shieldCount >= 2)
+        if (playerShip.currentShields >= 2)
         {
-            Vector3 orbitPos2 = center + new Vector3(Mathf.Cos(rad + Mathf.PI), Mathf.Sin(rad + Mathf.PI)) * orbitRadius;
-            shieldIndicator2.position = orbitPos2;
+            Vector3 shieldUIPos2 = center + new Vector3(Mathf.Cos(orbitRad + Mathf.PI), Mathf.Sin(orbitRad + Mathf.PI)) * orbitRadius;
+            shieldIndicator2.position = shieldUIPos2;
         }
+    }
+
+    public void HandleShieldUIVisual()
+    {
+        if (!playerShip)
+            return;
+
+        shieldIndicator1.gameObject.SetActive(playerShip.currentShields >= 1);
+        shieldIndicator2.gameObject.SetActive(playerShip.currentShields >= 2);
     }
 }

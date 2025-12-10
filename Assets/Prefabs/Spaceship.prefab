@@ -128,7 +128,7 @@ SpriteRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 873258928847186513}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -493,6 +493,7 @@ MonoBehaviour:
   shipRenderer: {fileID: 1662932528079986421}
   shieldVisual: {fileID: 0}
   shieldBaseScale: 1.5
+  shieldWeakScale: 0.8
   shieldHitScale: 2.5
   maxShields: 2
   currentShields: 2
@@ -796,13 +797,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e31111e262270247861ba53e75de13e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  orbitCentre: {fileID: 0}
+  playerShip: {fileID: 0}
+  followTransform: {fileID: 0}
   shieldIndicator1: {fileID: 3822356458182670253}
   shieldIndicator2: {fileID: 6279397695916943987}
   orbitRadius: 0.2
   orbitSpeed: 90
-  smoothDuration: 0.06
-  shieldCount: 2
+  smoothFollowDuration: 0.06
 --- !u!1001 &8749523110127506683
 PrefabInstance:
   m_ObjectHideFlags: 0

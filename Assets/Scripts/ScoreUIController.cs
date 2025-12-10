@@ -4,7 +4,7 @@ using UnityEngine;
 public class ScoreUIController : MonoBehaviour
 {
     [Header("Score Reference Settings")]
-    public static ScoreUIController Instance;
+    public static ScoreUIController scoreUIInstance;
     public TMP_Text scoreText;
 
 
@@ -15,7 +15,7 @@ public class ScoreUIController : MonoBehaviour
 
     void Start()
     {
-        Instance = this;
+        scoreUIInstance = this;
         AudioManagerController.Instance.PlayMusic(AudioManagerController.Instance.gameMusic, AudioManagerController.Instance.gameMusicVolume);
     }
 

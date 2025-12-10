@@ -1,3 +1,4 @@
+using UnityEditor.Rendering.LookDev;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -6,30 +7,39 @@ public class AsteroidSpawnController : MonoBehaviour
     [Header("Asteroid Settings")]
     public GameObject[] asteroidArray; //array of asteroid prefabs to spawn
 
+
     [Header("Asteroid Spawn Settings")]
     public float spawnInterval = 3f; //time between spawn checks
     public float intitialForce = 100f; //initial force applied to spawned asteroids
-    public int spawnThreshold = 10; //total asteroid value threshold to trigger new spawns
+    public int spawnValueThreshold = 10; //total asteroid value threshold to trigger new spawns
     public float spawnOffset = 1.2f; // distance from center of screen to spawn
     public float directionSkew = 2f; //amount to skew force direction
-
-    [Header("Private Settings")]
     private float spawnTimer = 0f; //timer to track spawn intervals
+
+
+    [Header("Screen Shake Settings")]
+    public CameraController cameraShake; // camera shake controller
+    public float screenShakeSpawnMultiplier = 0.1f; // multiplier for screen shake intensity
 
 
     void Start()
     {
-
+        cameraShake = Object.FindAnyObjectByType<CameraController>();
     }
 
     void Update()
+    {
+        HandleAsteroidSpawn();
+    }
+
+    public void HandleAsteroidSpawn()
     {
         spawnTimer += Time.deltaTime;
 
         if (spawnTimer > spawnInterval)
         {
             spawnTimer = 0f;
-            if (TotalAsteroidValue() < spawnThreshold)
+            if (TotalAsteroidValue() < spawnValueThreshold)
             {
                 SpawnNewAsteroid();
             }
@@ -38,15 +48,15 @@ public class AsteroidSpawnController : MonoBehaviour
 
     public int TotalAsteroidValue()
     {
-        //find all asteroids in the scene
         AsteroidController[] asteroids = FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);
-        int value = 0;
+
+        int totalAsteroidValue = 0;
         foreach (AsteroidController asteroid in asteroids)
         {
-            value += asteroid.asteroidValue;
+            totalAsteroidValue += asteroid.asteroidSpawnValue;
         }
 
-        return value;
+        return totalAsteroidValue;
     }
 
     public void SpawnNewAsteroid()
@@ -54,15 +64,13 @@ public class AsteroidSpawnController : MonoBehaviour
         if (asteroidArray.Length == 0) 
             return;
 
-        //select random asteroid prefab
         int randomAsteroidIndex = Random.Range(0, asteroidArray.Length);
         GameObject asteroidToSpawn = asteroidArray[randomAsteroidIndex];
 
-        //calculate spawn position
         Vector3 asteroidSpawnPos = RandomSpawnPoint();
         GameObject asteroid = Instantiate(asteroidToSpawn, asteroidSpawnPos, Quaternion.identity);
+        cameraShake.StartSceenShake(screenShakeSpawnMultiplier);
 
-        //apply initial force to asteroid
         Rigidbody2D asteroidRB = asteroid.GetComponent<Rigidbody2D>();
         if (asteroidRB)
         {
@@ -77,16 +85,17 @@ public class AsteroidSpawnController : MonoBehaviour
         Vector2 randomOffset = (Vector2)transform.position + viewportPos * spawnOffset;
         Vector3 worldPos = Camera.main.ViewportToWorldPoint(randomOffset);
         worldPos.z = transform.position.z;
+
         return worldPos;
     }
 
     public Vector2 ForceDirection(Vector2 asteroidSpawnPos)
     {
         Vector2 targetPos = Vector2.zero;
-
         Vector2 directionToPlayer = (targetPos - asteroidSpawnPos).normalized;
         Vector2 randomSkew = Random.insideUnitCircle * directionSkew;
         Vector2 endForceDirection = (directionToPlayer + randomSkew).normalized;
+
         return endForceDirection;
     }
 }

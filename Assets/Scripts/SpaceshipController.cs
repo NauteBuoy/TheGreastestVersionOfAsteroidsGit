@@ -22,7 +22,8 @@ public class SpaceshipController : MonoBehaviour
     [Header("Shield Reference Settings")]
     public SpriteRenderer shieldVisual;
     public float shieldBaseScale = 1f;
-    public float shieldHitScale = 1.25f;
+    public float shieldWeakScale = 0.8f;
+    public float shieldHitScale = 1.2f;
     public int maxShields = 2;
     public int currentShields = 2;
     public float shieldRechargeDelay = 3f;
@@ -159,7 +160,7 @@ public class SpaceshipController : MonoBehaviour
 
     private void LateUpdate()
     {
-        HandleVisualLagRotation();
+        //HandleVisualLagRotation();
     }
 
     private void HandleMovementInput()
@@ -462,12 +463,15 @@ public class SpaceshipController : MonoBehaviour
 
     public void ShieldDamage()
     {
+
+        UpdateImmuneVisual();
+
         currentShields--;
-        shieldUI.shieldCount = currentShields;
 
         if (currentShields > 0)
         {
             TriggerShieldHit();
+            StartCoroutine(RechargeShieldRoutine());
         }
         else
         {
@@ -486,7 +490,7 @@ public class SpaceshipController : MonoBehaviour
         float shieldTargetScale = shieldBaseScale;
         if (currentShields == 1)
         {
-            shieldTargetScale *= 0.5f;
+            shieldTargetScale *= shieldWeakScale;
         }
 
         shieldVisual.transform.localScale = Vector3.Lerp(shieldVisual.transform.localScale, Vector3.one * shieldTargetScale, Time.deltaTime * squashStretchReturnSpeed);
@@ -494,7 +498,7 @@ public class SpaceshipController : MonoBehaviour
 
     public void TriggerShieldHit()
     {
-        AudioManagerController.Instance.PlaySFX(AudioManagerController.Instance.shipCollisionSFX, AudioManagerController.Instance.normalCollisionVolume);
+        AudioManagerController.Instance.PlaySFX(AudioManagerController.Instance.collisionSFX, AudioManagerController.Instance.normalCollisionVolume);
         Instantiate(collsionFX, transform.position, Quaternion.identity);
         shieldVisual.transform.localScale = Vector3.one * shieldHitScale;
         cameraShake.StartSceenShake(screenShakeCollisionMultiplier);
@@ -502,11 +506,10 @@ public class SpaceshipController : MonoBehaviour
 
     private void TriggerShieldBreak()
     {
-        AudioManagerController.Instance.PlaySFX(AudioManagerController.Instance.shipCollisionSFX, AudioManagerController.Instance.normalCollisionVolume);
+        AudioManagerController.Instance.PlaySFX(AudioManagerController.Instance.collisionSFX, AudioManagerController.Instance.normalCollisionVolume);
         Instantiate(shieldShatterFX, transform.position, Quaternion.identity);
 
         shieldVisual.transform.localScale = Vector3.one * (shieldHitScale * 1.5f);
-        shieldUI.shieldCount = 0;
 
         cameraShake.StartSceenShake(screenShakeDamageMultiplier);
         StartCoroutine(screenFlash.FlashRoutine());
@@ -525,12 +528,34 @@ public class SpaceshipController : MonoBehaviour
         {
             yield return new WaitForSeconds(shieldRechargeRate);
             currentShields++;
-            shieldUI.shieldCount = currentShields;
+
             //shieldVisual.transform.localScale = Vector3.one * shieldHitScale;
         }
 
         isRecharging = false;
     }
+
+    private void UpdateImmuneVisual()
+    {
+        if (!shipRenderer)
+            return;
+
+        ShieldController shield = FindAnyObjectByType<ShieldController>();
+        bool isimmune = shield.isImmune;
+
+        if (isimmune)
+        {
+            Color immunityColour = Color.red;
+            shipRenderer.color = immunityColour;
+        }
+        else
+        {
+            shipRenderer.color = Color.white;
+        }
+    }
+
+
+
 
     public void AddHeat(float amount)
     {

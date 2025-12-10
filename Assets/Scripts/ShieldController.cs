@@ -10,15 +10,17 @@ public class ShieldController : MonoBehaviour
     public SpriteRenderer shieldVisual;
     public CircleCollider2D shieldCollider;
 
-    [Header("Follow Settings")]
-    public float followSpeed = 30f;
-    public float smoothDuration = 0.03f;
-    private Vector3 followVel;
 
-
-    [Header("Collision Settings")]
-    public float collisionImunityDuration = 0.2f;
+    [Header("Immunity Settings")]
+    public float imunityDuration = 0.2f;
     public bool isImmune = false;
+
+
+    [Header("Follow Settings")]
+    public float followSpeed = 30f; //LERP
+    public float smoothFollowDuration = 0.03f; //DAMP
+    private Vector3 followCentreVel;
+
 
     void Start()
     { 
@@ -36,10 +38,10 @@ public class ShieldController : MonoBehaviour
     
     public void HandleFollow()
     {
-        if (followTransform)
-        {
-            transform.position = Vector3.SmoothDamp(transform.position, followTransform.position, ref followVel, smoothDuration);
-        }
+        if (!playerShip)
+            return;
+
+        transform.position = Vector3.SmoothDamp(transform.position, followTransform.position, ref followCentreVel, smoothFollowDuration);
     }
 
     public void HandleShieldVisual()
@@ -63,10 +65,11 @@ public class ShieldController : MonoBehaviour
         StartCoroutine(collisionImmunityRoutine());
     }
 
+
     IEnumerator collisionImmunityRoutine()
     {
         isImmune = true;
-        yield return new WaitForSeconds(collisionImunityDuration);
+        yield return new WaitForSeconds(imunityDuration);
         isImmune = false;
     }
 }
