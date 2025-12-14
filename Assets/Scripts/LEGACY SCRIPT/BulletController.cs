@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class BulletController : MonoBehaviour
 {
-    public float Damage = 1f;
+    public int Damage = 1;
     public GameObject explosionFX;
 
 

@@ -51,9 +51,9 @@ MonoBehaviour:
   - {fileID: 4082472932018963504, guid: b64ef9f378cbcb2408714bdf2d25a51e, type: 3}
   - {fileID: 2428923140451405553, guid: a3e4db3c4b9ce584e89580314747a0c1, type: 3}
   - {fileID: 562265514404860698, guid: 8d7be979717efce4893b519e20775826, type: 3}
-  spawnInterval: 2
-  intitialForce: 100
-  spawnValueThreshold: 10
+  spawnInterval: 1
+  intitialForce: 400
+  spawnValueThreshold: 25
   spawnOffset: 1.5
   directionSkew: 40
   cameraShake: {fileID: 0}

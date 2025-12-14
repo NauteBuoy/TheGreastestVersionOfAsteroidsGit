@@ -14,11 +14,6 @@ public class ScreenFlashController : MonoBehaviour
         flashColor = flashImage.color;
     }
 
-    void Update()
-    {
-        
-    }
-
     public IEnumerator FlashRoutine()
     {
 

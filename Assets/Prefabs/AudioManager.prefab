@@ -305,18 +305,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2706160123ef92a4d860389f7c1fde76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  musicAudioSource: {fileID: 3590408173155977709}
-  menuMusic: {fileID: 0}
-  gameMusic: {fileID: 0}
-  menuMusicVolume: 0.6
-  gameMusicVolume: 0.4
-  sfxAudioSource: {fileID: 2646280833833751055}
-  bulletSFX: {fileID: 0}
-  explosionSFX: {fileID: 0}
-  collisionSFX: {fileID: 0}
-  shipDeathSFX: {fileID: 0}
-  thrusterAudioSource: {fileID: 0}
-  thrusterLoop: {fileID: 0}
+  musicSource: {fileID: 3590408173155977709}
+  musicVolume: 0.6
+  titleMusic: {fileID: 8300000, guid: 7e0751ae6ce529c47afab08d5f47a7cc, type: 3}
+  gameMusic: {fileID: 8300000, guid: dba349ce09458d945a38305809a70f46, type: 3}
+  sfxSource: {fileID: 2646280833833751055}
+  sfxVolume: 0.3
+  dischargeSFX: {fileID: 8300000, guid: 33c4c146ec0ddae4896f342da84b6a7c, type: 3}
+  collisionSFX: {fileID: 8300000, guid: a277f5541cd88fa49b2d7b54dd485e09, type: 3}
+  explosionSFX: {fileID: 8300000, guid: a82320d679d93e348a413f0306f1ac3d, type: 3}
+  shieldHitSFX: {fileID: 8300000, guid: 1da0369a9bf748d40a28066ed7629a42, type: 3}
+  shieldBreakSFX: {fileID: 8300000, guid: 480a94d2f293d5948a5626c005dab3e3, type: 3}
+  deathSFX: {fileID: 8300000, guid: 00d44cbff4851614dbc737bcfa9f67f1, type: 3}
+  scoreTickSFX: {fileID: 8300000, guid: edab1d7937fe1854eaeaac62043e49b9, type: 3}
+  scoreTickVolume: 0.2
+  thrusterSFX: {fileID: 8300000, guid: bee95fa604fc16d438935bfbd26bc6fa, type: 3}
+  thrusterAudioSource: {fileID: 7076189318509768230}
 --- !u!1 &7178151716879359182
 GameObject:
   m_ObjectHideFlags: 0

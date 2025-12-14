@@ -6,12 +6,12 @@ public class TitleUIController : MonoBehaviour
 {
     void Start()
     {
-        AudioManagerController.Instance.PlayMusic(AudioManagerController.Instance.menuMusic, AudioManagerController.Instance.menuMusicVolume);
+        AudioManagerController.audioManagerInstance.PlayMusic(AudioManagerController.audioManagerInstance.splashMusic, AudioManagerController.audioManagerInstance.musicVolume);
     }
 
     public void ClickPlay()
     {
-        SceneManager.LoadScene("GameScene");
+        SceneManager.LoadScene("Game");
     }
     public void ClickQuit()
     {

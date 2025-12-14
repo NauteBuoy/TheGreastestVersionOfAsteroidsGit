@@ -10,19 +10,15 @@ public class GameOverUIController : MonoBehaviour
     public GameObject gameOverPanel;
     public GameObject NewHighScore;
 
-    private SpaceshipController playerShip;
-
-
     void Start()
     {
-        playerShip = Object.FindAnyObjectByType<SpaceshipController>();
         Hide();
     }
 
     public void Show(bool newHighScore)
     {
-        scoreTextBox.text = playerShip.score.ToString();
-        highScoreTextBox.text = playerShip.GetHighScore().ToString();
+        scoreTextBox.text = GameManagerController.gameManagerInstance.score.ToString();
+        highScoreTextBox.text = GameManagerController.gameManagerInstance.GetHighScore().ToString();
 
         gameOverPanel.SetActive(true);
         NewHighScore.SetActive(newHighScore);
@@ -39,6 +35,6 @@ public class GameOverUIController : MonoBehaviour
     }
     public void ClickMainMenu()
     {
-        SceneManager.LoadScene("TitleScene");
+        SceneManager.LoadScene("Splash");
     }
 }

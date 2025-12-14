@@ -1,64 +1,76 @@
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class ShieldUIController : MonoBehaviour
 {
     [Header("Reference Settings")]
-    public SpaceshipController playerShip;
-    public Transform followTransform;
-    public Transform shieldIndicator1;
-    public Transform shieldIndicator2;
-
+    public SpaceshipController playership; //reference to player ship
+    public ShieldController shield; //reference to shield controller
+    public Transform followTransform; //transform to follow
+    public Transform shieldIndicator1; //first shield indicator
+    public Transform shieldIndicator2; //second shield indicator
 
     [Header("Orbit/Follow Settings")]
-    public float orbitRadius = 1.1f;
-    public float orbitSpeed = 180f;
-    public float smoothFollowDuration = 0.06f;
-    public float orbitAngle;
-    Vector3 followCentreVel;
+    public float orbitRadius = 1.1f; //radius of orbit around player
+    public float orbitSpeed = 180f; //degrees per second
+    public float smoothFollowDuration = 0.06f; //smoothing duration for following
+    public float orbitAngle; //current orbit angle in degrees
+    Vector3 orbitCentreVel; //velocity reference for SmoothDamp
 
 
     void Start()
     {
-        playerShip = SpaceshipController.playerShipInstance;
-        followTransform = playerShip.transform;
+        playership = SpaceshipController.playerInstance;
+        shield = Object.FindAnyObjectByType<ShieldController>();
+        followTransform = playership.transform;
     }
 
     void Update()
     {
-        HandleShieldUIOrbit();
-        HandleShieldUIVisual();
+        HandleShieldUI();
     }
 
-    public void HandleShieldUIOrbit()
+    public void HandleShieldUI()
     {
-        if (!playerShip)
+        if (!shield)
+            return;
+        if (!followTransform)
             return;
 
-        Vector3 center = Vector3.SmoothDamp(transform.position, followTransform.position, ref followCentreVel, smoothFollowDuration);
+        int shieldCount = shield.currentShieldCharges;
 
-        // Orbit positions
+        Vector3 centre = Vector3.SmoothDamp(transform.position, followTransform.position, ref orbitCentreVel, smoothFollowDuration);
+        transform.position = centre; 
+
+        if (orbitAngle > 360f)
+        {
+            orbitAngle -= 360f;
+        }
+
         orbitAngle += orbitSpeed * Time.deltaTime;
         float orbitRad = orbitAngle * Mathf.Deg2Rad;
 
-        if (playerShip.currentShields >= 1)
+        shieldIndicator1.gameObject.SetActive(shieldCount >= 1);
+        shieldIndicator2.gameObject.SetActive(shieldCount >= 2);
+
+        if (shieldCount >= 1 && shieldIndicator1)
         {
-            Vector3 shieldUIPos1 = center + new Vector3(Mathf.Cos(orbitRad), Mathf.Sin(orbitRad)) * orbitRadius;
-            shieldIndicator1.position = shieldUIPos1;
+            Vector3 orbitPos1 = centre + new Vector3(Mathf.Cos(orbitRad), Mathf.Sin(orbitRad)) * orbitRadius;
+            shieldIndicator1.position = orbitPos1;
         }
 
-        if (playerShip.currentShields >= 2)
+        if (shieldCount >= 2 && shieldIndicator2)
         {
-            Vector3 shieldUIPos2 = center + new Vector3(Mathf.Cos(orbitRad + Mathf.PI), Mathf.Sin(orbitRad + Mathf.PI)) * orbitRadius;
-            shieldIndicator2.position = shieldUIPos2;
+            Vector3 orbitPos2 = centre + new Vector3(Mathf.Cos(orbitRad + Mathf.PI), Mathf.Sin(orbitRad + Mathf.PI)) * orbitRadius;
+            shieldIndicator2.position = orbitPos2;
         }
     }
 
-    public void HandleShieldUIVisual()
+    public void SetShieldCount(int count)
     {
-        if (!playerShip)
-            return;
-
-        shieldIndicator1.gameObject.SetActive(playerShip.currentShields >= 1);
-        shieldIndicator2.gameObject.SetActive(playerShip.currentShields >= 2);
+        if (shield)
+        {
+            shield.currentShieldCharges = count;
+        }
     }
 }

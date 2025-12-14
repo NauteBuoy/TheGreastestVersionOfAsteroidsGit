@@ -3,84 +3,120 @@ using UnityEngine.Rendering;
 
 public class AudioManagerController : MonoBehaviour
 {
-    public static AudioManagerController Instance;
+    [Header("Reference Settings")]
+    public static AudioManagerController audioManagerInstance;
 
+    [Header("Music Settings")]
+    public AudioSource musicSource;
+    public float musicVolume = 0.6f;
 
-    public AudioSource musicAudioSource;
-    public AudioClip menuMusic;
+    [Header("Music List")]
+    public AudioClip splashMusic;
     public AudioClip gameMusic;
-    public float menuMusicVolume = 0.6f;
-    public float gameMusicVolume = 0.4f;
 
     [Header("SFX Settings")]
-    public AudioSource sfxAudioSource;
-    public AudioClip bulletSFX;
-    public AudioClip explosionSFX;
+    public AudioSource sfxSource;
+    public float sfxVolume = 0.4f;
+    public float sfxVolumeLoud = 0.8f;
+
+    [Header("SFX List")]
+    public AudioClip dischargeSFX;
     public AudioClip collisionSFX;
-    public AudioClip shipDeathSFX;
-    public float collisionVolume = 0.3f; 
-    public float normalCollisionVolume = 1f;   
+    public AudioClip explosionSFX;
+    public AudioClip shieldHitSFX;
+    public AudioClip shieldBreakSFX;
+    public AudioClip stateChangeSFX;
+    public AudioClip deathSFX;
+
+    [Header("Score SFX")]
+    public AudioClip scoreTickSFX;
+    public float scoreTickVolume = 0.2f;
 
     [Header("Thruster Settings")]
-    public AudioSource thrusterAudioSource;
+    public AudioSource thrusterSource;
+    public float thrusterVolume = 0.1f;
     public AudioClip thrusterSFX;
+
+
 
     void Start()
     {
-        thrusterAudioSource.clip = thrusterSFX;
-        thrusterAudioSource.loop = true;
-        thrusterAudioSource.playOnAwake = false;
-
-
-        if (Instance)
+        if (audioManagerInstance)
         {
             Destroy(gameObject);
             return;
         }
-
-        Instance = this;
+        audioManagerInstance = this;
         DontDestroyOnLoad(gameObject);
-    }
 
-    void Update()
-    {
-        
+        if (thrusterSource && thrusterSFX)
+        {
+            thrusterSource.clip = thrusterSFX;
+            thrusterSource.loop = true;
+            thrusterSource.volume = thrusterVolume;
+            thrusterSource.playOnAwake = false;
+        }
     }
 
     public void PlayMusic(AudioClip clip, float volume, bool loop = true)
     {
-        if (!clip) 
+        if (!musicSource) 
+            return;
+        if (!clip)
             return;
 
-        musicAudioSource.clip = clip;
-        musicAudioSource.loop = loop;
-        musicAudioSource.volume = volume;
-        musicAudioSource.Play();
+        musicSource.clip = clip;
+        musicSource.loop = loop;
+        musicSource.volume = volume;
+        musicSource.Play();
     }
 
     public void PlaySFX(AudioClip clip, float volume)
     {
+        if (!sfxSource)
+            return;
         if (!clip) 
             return;
 
-        musicAudioSource.PlayOneShot(clip, volume);
+        sfxSource.PlayOneShot(clip, volume);
     }
 
     public void PlayThruster(bool active)
     {
+        if (!thrusterSource)
+            return;
+        if (!thrusterSFX)
+            return;
+
         if (active)
         {
-            if (!thrusterAudioSource.isPlaying)
+            if (!thrusterSource.isPlaying)
             {
-                thrusterAudioSource.Play();
+                thrusterSource.Play();
             }
         }
         else
         {
-            if (thrusterAudioSource.isPlaying)
+            if (thrusterSource.isPlaying)
             {
-                thrusterAudioSource.Stop();
+                thrusterSource.Stop();
             }
         }
+    }
+
+    public void PlayStateChange()
+    {
+        if (!stateChangeSFX)
+            return;
+
+        sfxSource.PlayOneShot(stateChangeSFX, sfxVolume);
+    }
+
+    public void PlayScoreTick()
+    {
+        if (!scoreTickSFX)
+            return;
+
+        sfxSource.PlayOneShot(scoreTickSFX, scoreTickVolume);
     }
 }

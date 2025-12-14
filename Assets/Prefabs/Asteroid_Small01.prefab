@@ -49,14 +49,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   asteroidSpawnValue: 1
-  rotationSkew: 40
-  hitPointMax: 1
-  collisionDamage: 1
-  collsionFX: {fileID: 5999593711267985948, guid: 655eed02206ea33438b6128524cb6bcd, type: 3}
   cameraShake: {fileID: 0}
+  rotationSkew: 40
+  hitPointMax: 2
+  collisionDamage: 1
+  collisionFX: {fileID: 5999593711267985948, guid: 655eed02206ea33438b6128524cb6bcd, type: 3}
   screenShakeMultiplier: 0.2
-  collisionHitTime: 0
-  nextCollisionHitDuration: 0.2
+  lastCollisionTime: 0
+  collisionCooldown: 0.15
   asteroidChunks:
   - {fileID: 0}
   explosionFX: {fileID: 5999593711267985948, guid: e98c9b661b7d9f245aff5d8f894778fe, type: 3}

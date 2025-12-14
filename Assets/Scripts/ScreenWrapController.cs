@@ -3,12 +3,12 @@ using UnityEngine;
 
 public class ScreenWrapController : MonoBehaviour
 {
-    private Camera cam;
-    private float camHeight;
-    private float camWidth;
-    float wrapMargin = 0.25f;
-    public ParticleSystem wrapFX;
-    private Vector3 lastPos;
+    [Header("Screen Wrap Settings")]
+    private Camera cam; // reference to main camera
+    private float camHeight; // height of the camera view
+    private float camWidth; // width of the camera view
+    public ParticleSystem wrapFX; // particle effect to play on wrap
+    private Vector3 lastPos; // last position of the object
 
 
     void Start()
@@ -19,26 +19,33 @@ public class ScreenWrapController : MonoBehaviour
         lastPos = transform.position;
     }
 
+    Vector2 GetScreenBounds()
+    {
+        float camHeight = cam.orthographicSize * 2f;
+        float camWidth = camHeight * cam.aspect;
+        return new Vector2(camWidth * 0.5f, camHeight * 0.5f);
+    }
+
     void LateUpdate()
     {
         Vector3 pos = transform.position;
+        Vector2 bounds = GetScreenBounds();
 
-        if (pos.x > camWidth + wrapMargin)
+        if (pos.x > bounds.x)
         {
-            pos.x = -camWidth - wrapMargin;
+            pos.x = -bounds.x;
         }
-        else if (pos.x < -camWidth - wrapMargin)
+        else if (pos.x < -bounds.x)
         {
-            pos.x = camWidth + wrapMargin;
+            pos.x = bounds.x;
         }
-
-        if (pos.y > camHeight + wrapMargin)
+        if (pos.y > bounds.y)
         {
-            pos.y = -camHeight - wrapMargin;
+            pos.y = -bounds.y;
         }
-        else if (pos.y < -camHeight - wrapMargin)
+        else if (pos.y < -bounds.y)
         {
-            pos.y = camHeight + wrapMargin;
+            pos.y = bounds.y;
         }
 
         transform.position = pos;

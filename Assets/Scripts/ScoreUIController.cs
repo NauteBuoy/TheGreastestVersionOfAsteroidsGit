@@ -7,24 +7,12 @@ public class ScoreUIController : MonoBehaviour
     public static ScoreUIController scoreUIInstance;
     public TMP_Text scoreText;
 
-
-    [Header("Animation Settings")]
-    public float animaitonScale = 1.35f;     // how big the pop is
-    public float animationSpeed = 16f;       // speed of pop animation
-
-
-    void Start()
+    void Awake()
     {
         scoreUIInstance = this;
-        AudioManagerController.Instance.PlayMusic(AudioManagerController.Instance.gameMusic, AudioManagerController.Instance.gameMusicVolume);
     }
 
-    void Update()
-    {
-
-    }
-
-    public void UpdateScore(int score)
+    public void UpdateScoreDisplay(int score)
     {
         scoreText.text = score.ToString();
     }
